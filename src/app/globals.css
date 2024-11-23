@@ -2,20 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+body {
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+.nav {
+  @apply bg-[#09090b];
+}
+
+@layer base {
+  :root {
+    --background: 240 6% 96%; /* Soft Gray (f5f5f6) */
+    --foreground: 240 10% 3.9%; /* Dark Charcoal */
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 240 10% 3.9%; /* Dark Charcoal */
+    --popover: 0 0% 100%; /* White */
+    --popover-foreground: 240 10% 3.9%; /* Dark Charcoal */
+    --primary: 12 90% 55%; /* Cinnabar */
+    --primary-foreground: 0 0% 98%; /* Light Text */
+    --secondary: 60 100% 94%; /* Beige */
+    --secondary-foreground: 240 10% 3.9%; /* Dark Charcoal */
+    --muted: 240 4.8% 95.9%; /* Light Gray */
+    --muted-foreground: 240 3.8% 46.1%; /* Medium Gray */
+    --accent: 240 4.8% 95.9%; /* Light Gray */
+    --accent-foreground: 240 5.9% 10%; /* Dark Charcoal */
+    --destructive: 0 84.2% 60.2%; /* Red */
+    --destructive-foreground: 0 0% 98%; /* Light Foreground */
+    --border: 240 5.9% 90%; /* Light Gray Border */
+    --input: 240 5.9% 90%; /* Light Gray Input */
+    --ring: 240 5.9% 10%; /* Dark Ring */
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%; /* Cinnabar */
+    --chart-2: 173 58% 39%; /* Teal */
+    --chart-3: 197 37% 24%; /* Dark Blue */
+    --chart-4: 43 74% 66%; /* Bright Yellow */
+    --chart-5: 27 87% 67%; /* Orange */
+  }
+
+  .dark {
+    --background: 240 10% 3.9%; /* Deep Charcoal */
+    --foreground: 0 0% 98%; /* Off-White */
+    --card: 240 10% 3.9%; /* Dark Charcoal */
+    --card-foreground: 0 0% 98%; /* Off-White */
+    --popover: 240 10% 3.9%; /* Dark Charcoal */
+    --popover-foreground: 0 0% 98%; /* Off-White */
+    --primary: 12 90% 55%; /* Light */
+    --primary-foreground: 240 5.9% 10%; /* Charcoal */
+    --secondary: 240 3.7% 15.9%; /* Dark Beige */
+    --secondary-foreground: 0 0% 98%; /* Light Foreground */
+    --muted: 240 3.7% 15.9%; /* Dark Muted */
+    --muted-foreground: 240 5% 64.9%; /* Gray */
+    --accent: 240 3.7% 15.9%; /* Dark Accent */
+    --accent-foreground: 0 0% 98%; /* Light Accent Foreground */
+    --destructive: 0 62.8% 30.6%; /* Darker Red */
+    --destructive-foreground: 0 0% 98%; /* Light Foreground */
+    --border: 240 3.7% 15.9%; /* Dark Border */
+    --input: 240 3.7% 15.9%; /* Dark Input */
+    --ring: 240 4.9% 83.9%; /* Lighter Ring */
+    --chart-1: 220 70% 50%; /* Cinnabar */
+    --chart-2: 160 60% 45%; /* Teal */
+    --chart-3: 30 80% 55%; /* Bright Yellow */
+    --chart-4: 280 65% 60%; /* Purple */
+    --chart-5: 340 75% 55%; /* Pink */
+  }
 }
