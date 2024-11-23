@@ -1,13 +1,38 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSocket } from "@/context/socketProvider";
 import useMediaStream from "@/hooks/useMediaStream";
 import Player from "./components/Player";
 import * as mediasoupClient from "mediasoup-client";
-import { create } from "domain";
 
 let device: mediasoupClient.Device;
 let routerRtpCapabilities: any;
+let producerTransport: mediasoupClient.types.Transport;
+let producer: mediasoupClient.types.Producer;
+
+let params = {
+  // Mediasoup parameters
+  encoding: [
+    {
+      rid: "r0",
+      maxBitrate: 100000,
+      scalabilityMode: "S1T3",
+    },
+    {
+      rid: "r1",
+      maxBitrate: 300000,
+      scalabilityMode: "S1T3",
+    },
+    {
+      rid: "r2",
+      maxBitrate: 900000,
+      scalabilityMode: "S1T3",
+    },
+  ],
+  codecOptions: {
+    videoGoogleStartBitrate: 1000,
+  },
+};
 
 type TransportCallbackParams = mediasoupClient.types.TransportOptions & {
   error?: string; // Include error as optional
@@ -31,8 +56,10 @@ const createDevice = async () => {
 };
 
 const Space = () => {
-  const { stream } = useMediaStream();
   const socket = useSocket();
+  const [isTransportReady, setIsTransportReady] = useState(false);
+  const { stream } = useMediaStream();
+
   useEffect(() => {
     if (!socket) return;
 
@@ -65,6 +92,54 @@ const Space = () => {
             return;
           }
           console.log("Transport received from server:", params);
+
+          // Making Client ProducerTransport from transport received from server
+          producerTransport = device.createSendTransport(params);
+          setIsTransportReady(true);
+
+          producerTransport.on(
+            "connect",
+            async ({ dtlsParameters }, callback, errback) => {
+              try {
+                // sending dtls parameters to server
+                await socket.emit("transport-connect", {
+                  // transportId: producerTransport.id,
+                  dtlsParameters: dtlsParameters,
+                });
+
+                // telling transport that parameters were transmitted to server
+                callback();
+              } catch (error) {
+                errback(error as Error);
+              }
+            }
+          );
+
+          producerTransport.on(
+            "produce",
+            async (parameters, callback, errback) => {
+              console.log("producerTransport.on produce", parameters);
+
+              try {
+                await socket.emit(
+                  "transport-produce",
+                  {
+                    // transportId: producerTransport.id,
+                    kind: parameters.kind,
+                    rtpParameters: parameters.rtpParameters,
+                    appData: parameters.appData,
+                  },
+                  ({ id }: { id: string }) => {
+                    // Telling the transport that parameters were sent
+                    // and this is our server side producer's id
+                    callback({ id });
+                  }
+                );
+              } catch (error) {
+                errback(error as Error);
+              }
+            }
+          );
         }
       );
     };
@@ -78,6 +153,45 @@ const Space = () => {
       socket.off("router-rtp-capabilities", receiveRouterRtpCapabilities);
     };
   }, [socket]);
+
+  useEffect(() => {
+    if (!stream || !isTransportReady) {
+      console.log("Waiting for dependencies:", {
+        hasStream: !!stream,
+        streamTracks: stream?.getTracks().length,
+        transportReady: isTransportReady,
+      });
+      return;
+    }
+
+    console.log("All dependencies ready, connecting transport");
+    const connectSendTransport = async () => {
+      try {
+        const track = stream?.getVideoTracks()[0];
+        console.log("Got video track:", !!track);
+
+        producer = await producerTransport.produce({
+          ...params,
+          track,
+          appData: { mediaTag: "cam-video" },
+        });
+
+        console.log("Producer created successfully");
+
+        producer.on("trackended", () => {
+          console.log("Track ended");
+        });
+
+        producer.on("transportclose", () => {
+          console.log("Transport closed");
+        });
+      } catch (error) {
+        console.error("Error in connectSendTransport:", error);
+      }
+    };
+
+    connectSendTransport();
+  }, [stream, isTransportReady]);
 
   const myId = "sdfj322"; //My peer or socked id
   return (
