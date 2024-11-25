@@ -4,11 +4,30 @@ import { useSocket } from "@/context/socketProvider";
 import useMediaStream from "@/hooks/useMediaStream";
 import Player from "./components/Player";
 import * as mediasoupClient from "mediasoup-client";
+import { useParams } from "next/navigation";
+
+type TransportCallbackParams = mediasoupClient.types.TransportOptions & {
+  error?: string;
+};
+
+type ConsumerCallbackParams = any;
+
+type PeerStream = {
+  userId: string;
+  stream: MediaStream;
+};
+
+interface ConsumerTransportEntry {
+  consumerTransport: mediasoupClient.types.Transport;
+  serverConsumerTransportId: string | undefined; // or 'number' based on your implementation
+  producerId: string;
+  consumer: mediasoupClient.types.Consumer;
+}
 
 let device: mediasoupClient.Device;
 let routerRtpCapabilities: any;
 let producerTransport: mediasoupClient.types.Transport;
-let consumerTransport: mediasoupClient.types.Transport;
+let consumerTransports: ConsumerTransportEntry[] = [];
 let producer: mediasoupClient.types.Producer;
 let consumer: mediasoupClient.types.Consumer;
 
@@ -36,19 +55,6 @@ let params = {
   },
 };
 
-type TransportCallbackParams = mediasoupClient.types.TransportOptions & {
-  error?: string;
-};
-
-type ConsumerCallbackParams = mediasoupClient.types.ConsumerOptions & {
-  error?: string;
-};
-
-type PeerStream = {
-  userId: string;
-  stream: MediaStream;
-};
-
 const createDevice = async () => {
   try {
     device = new mediasoupClient.Device();
@@ -67,12 +73,20 @@ const createDevice = async () => {
 };
 
 const Space = () => {
-  const socket = useSocket();
-  const [isProducerTransportReady, setIsProducerTransportReady] =
-    useState(false);
-  const [isConsumerTransportReady, setIsConsumerTransportReady] =
-    useState(false);
   const { stream } = useMediaStream();
+
+  const params = useParams<{ spaceId: string }>();
+  const spaceId = params.spaceId;
+  if (!spaceId)
+    return (
+      <div>
+        <h1 className='text-7xl'>Please provide a spaceId</h1>
+      </div>
+    );
+  console.log("spaceId", spaceId);
+
+  const socket = useSocket();
+
   const [peerStreams, setPeerStreams] = useState<Map<string, PeerStream>>(
     new Map()
   );
@@ -80,30 +94,240 @@ const Space = () => {
   useEffect(() => {
     if (!socket) return;
 
-    // Step 1: Client establish socket connection with server and receive router-rtp-capabilities
-    const handleClientConnected = (socketIdClient: string) => {
+    // Step 1:
+    // Client establish socket connection with server
+    const handleSocketConnection = (socketIdClient: string) => {
       console.log(
-        "Successfully connected to space with clientSocketId",
+        "Successfully connected to socket with clientSocketId",
         socketIdClient
+      );
+      syncSpace();
+    };
+
+    // Step 2:
+    // Send sync-space event to server with spaceId
+    // Get routerRtpCapabilities from server
+    // Get info that any producerAlreadyExist? in this space-router
+    // Create device with routerRtpCapabilities
+    const syncSpace = () => {
+      socket.emit("sync-space", { spaceId }, (data: any) => {
+        console.log("Space->Router rtp capabilities", data.rtpCapabilities);
+        routerRtpCapabilities = data.rtpCapabilities;
+        createDevice();
+        console.log("device created successfully");
+        console.log("isProducerExist :", data.isProducerExist);
+        if (data.isProducerExist) {
+          consumeExistingProducers();
+        }
+      });
+    };
+
+    // Signal received from server that new producer joined
+    const handleNewProducerJoined = ({
+      producerId,
+    }: {
+      producerId: string;
+    }) => {
+      console.log("New producer joined", producerId);
+      signalNewConsumerTransport(producerId);
+    };
+
+    const consumeExistingProducers = () => {
+      socket.emit("get-producers", (producerIds: Array<string>) => {
+        console.log("producerIds", producerIds);
+        // For each producer -> create a consumerTransport
+        producerIds.forEach((producerId: string) => {
+          signalNewConsumerTransport(producerId);
+        });
+      });
+    };
+
+    const signalNewConsumerTransport = async (remoteProducerId: string) => {
+      await socket.emit(
+        "createWebRtcTransport",
+        { consumer: true },
+        ({ params }: { params: TransportCallbackParams }) => {
+          if (params.error) {
+            console.log(`Error while creating send transport: ${params.error}`);
+            return;
+          }
+          console.log("Transport received from server:", params);
+          let consumerTransport = device.createRecvTransport(params);
+          // setIsConsumerTransportReady(true);
+
+          consumerTransport.on(
+            "connect",
+            async ({ dtlsParameters }, callback, errback) => {
+              try {
+                // sending dtls parameters to server
+                await socket.emit("transport-recv-connect", {
+                  // transportId: consumerTransport.id,
+                  dtlsParameters: dtlsParameters,
+                  serverConsumerTransportId: params.id,
+                });
+
+                // telling transport that parameters were transmitted to server
+                callback();
+              } catch (error) {
+                errback(error as Error);
+              }
+            }
+          );
+
+          connectConsumerTransport(
+            consumerTransport,
+            remoteProducerId,
+            params.id
+          );
+        }
       );
     };
 
-    const receiveRouterRtpCapabilities = (receivedRtpCapabilities: any) => {
-      routerRtpCapabilities = receivedRtpCapabilities;
-      console.log("router-rtp-capabilities", routerRtpCapabilities);
-      createDevice();
-      console.log("device created successfully");
-      // Step 2 : Client request server to create a transport
-      // This will be used as producer by client
-      createSendTransport();
-      createRcvTransport();
-      console.log("transport request sent");
+    const connectConsumerTransport = async (
+      consumerTransport: mediasoupClient.types.Transport,
+      remoteProducerId: string,
+      serverConsumerTransportId: string
+    ) => {
+      if (!socket) {
+        return;
+      }
+      try {
+        await socket.emit(
+          "consume",
+          {
+            rtpCapabilities: device.rtpCapabilities,
+            remoteProducerId,
+            serverConsumerTransportId,
+          },
+          async ({ params }: { params: ConsumerCallbackParams }) => {
+            if (params.error) {
+              console.log(
+                `Error while connecting consumer transport: ${params.error}`
+              );
+              return;
+            }
+
+            console.log("ConsumerTransport received from server:", params);
+            consumer = await consumerTransport.consume({
+              id: params.id,
+              producerId: params.producerId,
+              kind: params.kind,
+              rtpParameters: params.rtpParameters,
+            });
+
+            consumerTransports = [
+              ...consumerTransports,
+              {
+                consumerTransport,
+                serverConsumerTransportId: params.id,
+                producerId: remoteProducerId,
+                consumer,
+              },
+            ];
+
+            const { track } = consumer;
+            const mediaStream = new MediaStream([track]);
+            socket.emit("consumer-resume", {
+              serverConsumerTransportId: params.serverConsumerId,
+            });
+
+            setPeerStreams((prev) => {
+              const updated = new Map(prev);
+              updated.set(consumer.producerId, {
+                userId: consumer.producerId,
+                stream: mediaStream,
+              });
+              return updated;
+            });
+
+            console.log("Consumer created successfully");
+            consumer.on("transportclose", () => {
+              console.log("Consumer transport closed");
+            });
+          }
+        );
+      } catch (error) {
+        console.error("Error in connectConsumerTransport:", error);
+      }
+    };
+
+    // Producer Closed Connection
+    const handleProducerClosedConnection = ({
+      remoteProducerId,
+    }: {
+      remoteProducerId: string;
+    }) => {
+      // Close the client client consumer and associated transport
+      const producerToClose = consumerTransports.find(
+        (transportData) => transportData.producerId === remoteProducerId
+      );
+      producerToClose?.consumerTransport.close();
+      producerToClose?.consumer.close();
+
+      consumerTransports = consumerTransports.filter(
+        (transportData) => transportData.producerId !== remoteProducerId
+      );
+
+      // remove from peerStreams
+      setPeerStreams((prev) => {
+        const updated = new Map(prev);
+        updated.delete(remoteProducerId);
+        return updated;
+      });
+    };
+
+    socket.on("client-connected", handleSocketConnection);
+    socket.on("new-producer-joined", handleNewProducerJoined);
+    socket.on("producer-closed-connection", handleProducerClosedConnection);
+    // socket.on("router-rtp-capabilities", receiveRouterRtpCapabilities);
+    // socket.on("createWbeRtcTransport", {sender: true}, );
+
+    return () => {
+      // socket.off("connect");
+      socket.off("client-connected", handleSocketConnection);
+      socket.off("new-producer-joined", handleNewProducerJoined);
+      socket.off("producer-closed-connection", handleProducerClosedConnection);
+      // socket.off("router-rtp-capabilities", receiveRouterRtpCapabilities);
+    };
+  }, [socket]);
+
+  // For Producer
+  useEffect(() => {
+    if (!stream || !socket) {
+      console.log("Waiting for dependencies:");
+      return;
+    }
+    const connectSendTransport = async () => {
+      try {
+        const track = stream?.getVideoTracks()[0];
+        console.log("Got video track:", !!track);
+
+        producer = await producerTransport.produce({
+          ...params,
+          track,
+          appData: { mediaTag: "cam-video" },
+        });
+
+        console.log("Producer created successfully");
+
+        // Now, on creating producer server notified existing peers about this producer
+
+        producer.on("trackended", () => {
+          console.log("Track ended");
+        });
+
+        producer.on("transportclose", () => {
+          console.log("Producer transport closed");
+        });
+      } catch (error) {
+        console.error("Error in connectSendTransport:", error);
+      }
     };
 
     const createSendTransport = async () => {
       await socket.emit(
         "createWebRtcTransport",
-        { sender: true },
+        { consumer: false },
         ({ params }: { params: TransportCallbackParams }) => {
           if (params.error) {
             console.log(`Error while creating send transport: ${params.error}`);
@@ -113,7 +337,6 @@ const Space = () => {
 
           // Making Client ProducerTransport from transport received from server
           producerTransport = device.createSendTransport(params);
-          setIsProducerTransportReady(true);
 
           producerTransport.on(
             "connect",
@@ -124,7 +347,7 @@ const Space = () => {
                   // transportId: producerTransport.id,
                   dtlsParameters: dtlsParameters,
                 });
-
+                console.log("transport-connect event received on server");
                 // telling transport that parameters were transmitted to server
                 callback();
               } catch (error) {
@@ -158,149 +381,15 @@ const Space = () => {
               }
             }
           );
+          console.log("producerTransport created successfully");
+          console.log("connecting producer");
+          connectSendTransport();
         }
       );
     };
-
-    const createRcvTransport = async () => {
-      await socket.emit(
-        "createWebRtcTransport",
-        { sender: false },
-        ({ params }: { params: TransportCallbackParams }) => {
-          if (params.error) {
-            console.log(`Error while creating send transport: ${params.error}`);
-            return;
-          }
-          console.log("Transport received from server:", params);
-          consumerTransport = device.createRecvTransport(params);
-          setIsConsumerTransportReady(true);
-
-          consumerTransport.on(
-            "connect",
-            async ({ dtlsParameters }, callback, errback) => {
-              try {
-                // sending dtls parameters to server
-                await socket.emit("transport-recv-connect", {
-                  // transportId: consumerTransport.id,
-                  dtlsParameters: dtlsParameters,
-                });
-
-                // telling transport that parameters were transmitted to server
-                callback();
-              } catch (error) {
-                errback(error as Error);
-              }
-            }
-          );
-        }
-      );
-    };
-
-    socket.on("client-connected", handleClientConnected);
-    socket.on("router-rtp-capabilities", receiveRouterRtpCapabilities);
-    // socket.on("createWbeRtcTransport", {sender: true}, );
-
-    return () => {
-      socket.off("client-connected", handleClientConnected);
-      socket.off("router-rtp-capabilities", receiveRouterRtpCapabilities);
-    };
-  }, [socket]);
-
-  useEffect(() => {
-    if (!stream || !isProducerTransportReady) {
-      console.log("Waiting for dependencies:", {
-        hasStream: !!stream,
-        streamTracks: stream?.getTracks().length,
-        transportReady: isProducerTransportReady,
-      });
-      return;
-    }
-
-    console.log("All dependencies ready, connecting transport");
-    const connectSendTransport = async () => {
-      try {
-        const track = stream?.getVideoTracks()[0];
-        console.log("Got video track:", !!track);
-
-        producer = await producerTransport.produce({
-          ...params,
-          track,
-          appData: { mediaTag: "cam-video" },
-        });
-
-        console.log("Producer created successfully");
-
-        connectConsumerTransport();
-
-        producer.on("trackended", () => {
-          console.log("Track ended");
-        });
-
-        producer.on("transportclose", () => {
-          console.log("Producer transport closed");
-        });
-      } catch (error) {
-        console.error("Error in connectSendTransport:", error);
-      }
-    };
-
-    connectSendTransport();
-  }, [stream, isProducerTransportReady]);
-
-  // useEffect(() => {
-  //   if (!socket || !isConsumerTransportReady) return;
-  //   console.log("Consumer transport ready");
-
-  const connectConsumerTransport = async () => {
-    if (!socket) {
-      return;
-    }
-    try {
-      await socket.emit(
-        "consume",
-        {
-          rtpCapabilities: device.rtpCapabilities,
-        },
-        async ({ params }: { params: ConsumerCallbackParams }) => {
-          if (params.error) {
-            console.log(
-              `Error while connecting consumer transport: ${params.error}`
-            );
-            return;
-          }
-
-          console.log("ConsumerTransport received from server:", params);
-          consumer = await consumerTransport.consume({
-            id: params.id,
-            producerId: params.producerId,
-            kind: params.kind,
-            rtpParameters: params.rtpParameters,
-          });
-
-          const { track } = consumer;
-          const mediaStream = new MediaStream([track]);
-          socket.emit("consumer-resume");
-
-          setPeerStreams((prev) => {
-            const updated = new Map(prev);
-            updated.set(consumer.producerId, {
-              userId: consumer.producerId,
-              stream: mediaStream,
-            });
-            return updated;
-          });
-
-          console.log("Consumer created successfully");
-          consumer.on("transportclose", () => {
-            console.log("Consumer transport closed");
-          });
-        }
-      );
-    } catch (error) {
-      console.error("Error in connectConsumerTransport:", error);
-    }
-  };
-  // }, [isConsumerTransportReady]);
+    console.log("All dependencies ready, creating producer transport");
+    createSendTransport();
+  }, [stream, socket]);
 
   const myId = "sdfj322"; //My peer or socked id
   return (
@@ -350,3 +439,16 @@ const Space = () => {
 };
 
 export default Space;
+
+// Trash
+// const receiveRouterRtpCapabilities = (receivedRtpCapabilities: any) => {
+//   routerRtpCapabilities = receivedRtpCapabilities;
+//   console.log("router-rtp-capabilities", routerRtpCapabilities);
+//   // createDevice();
+//   console.log("device created successfully");
+//   // Step 2 : Client request server to create a transport
+//   // This will be used as producer by client
+//   // createSendTransport();
+//   // createRcvTransport();
+//   console.log("transport request sent");
+// };
