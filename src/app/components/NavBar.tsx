@@ -1,5 +1,6 @@
 import React from "react";
-import { ModeToggle } from "./ToggleModal";
+import { ModeToggle } from "./ModeToggle";
+import AuthButton from "./AuthButton";
 
 const NavBar = () => {
   return (
@@ -18,12 +19,7 @@ const NavBar = () => {
         <div className='block w-auto'>
           <ul className='font-medium p-0 flex rounded-lg flex-row space-x-8 rtl:space-x-reverse'>
             <li className='flex justify-center items-center'>
-              <a
-                href='#'
-                className='block font-medium text--foreground rounded hover:bg--muted hover:text--primary'
-              >
-                Sign In
-              </a>
+              <AuthButton />
             </li>
             <li>
               <ModeToggle />

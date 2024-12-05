@@ -1,6 +1,6 @@
 import { SocketProvider } from "@/context/socketProvider";
 
-export default function SpaceLayout({
+export default async function SpaceLayout({
   children,
 }: {
   children: React.ReactNode;

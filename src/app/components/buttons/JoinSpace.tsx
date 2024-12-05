@@ -19,14 +19,19 @@ const JoinSpace = () => {
   };
   return (
     <>
-      <div className='flex w-full max-w-sm items-center space-x-2'>
+      <div className='flex w-full items-center space-x-2 justify-center'>
         <Input
           type='text'
           onChange={updateId}
           value={spaceId}
           placeholder='Enter space id'
+          className='bg-background'
         />
-        <Button variant='outline' onClick={joinSpaceHandler}>
+        <Button
+          variant='outline'
+          onClick={joinSpaceHandler}
+          disabled={!spaceId}
+        >
           Join Space
         </Button>
       </div>

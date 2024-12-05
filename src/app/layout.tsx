@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-// import { SocketProvider } from "@/context/socketProvider";
 import { ThemeProvider } from "./components/ThemeProvider";
-import NavBar from "@/app/components/NavBar";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -37,12 +35,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {/* <SocketProvider> */}
-          <div>
-            <NavBar />
-            {children}
-          </div>
-          {/* </SocketProvider> */}
+          <div>{children}</div>
         </ThemeProvider>
       </body>
     </html>

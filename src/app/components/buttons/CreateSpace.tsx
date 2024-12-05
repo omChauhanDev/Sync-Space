@@ -13,7 +13,7 @@ const CreateSpace = () => {
     router.push(`space/${roomId}`);
   };
   return (
-    <Button onClick={createSpaceHandler}>
+    <Button onClick={createSpaceHandler} className='w-full'>
       <Rocket /> Create Space
     </Button>
   );

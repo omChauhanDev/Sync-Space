@@ -339,6 +339,23 @@ const Space = () => {
       console.log("Waiting for dependencies:");
       return;
     }
+
+    // creating new promise to add stream to videoStreams
+    // const addMyStreamToVideoStreams = async () => {
+    //   return new Promise<void>((resolve) => {
+    //     setVideoStreams((prev) => {
+    //       const updated = new Map(prev);
+    //       updated.set(stream.id, {
+    //         userId: stream.id,
+    //         stream: stream,
+    //       });
+    //       console.log("Updated video streams:", updated.size); // Debug log
+    //       return updated;
+    //     });
+    //     resolve();
+    //   });
+    // };
+
     const connectSendTransport = async () => {
       try {
         const track = stream?.getVideoTracks()[0];
@@ -433,33 +450,32 @@ const Space = () => {
     createSendTransport();
   }, [stream, socket]);
 
-  const myId = "sdfj322"; //My peer or socked id
-  return (
-    // <div className='min-h-screen h-full flex items-center justify-center'>
-    //   <h1 className='text-7xl'>This is my Space</h1>
-    //   <Player url={stream} muted={true} playing={true} playerId={myId} />
-    // </div>
-    <div className='min-h-screen h-full flex flex-col items-center justify-center p-4'>
-      <h1 className='text-4xl md:text-7xl mb-8 text-center'>Sync Space</h1>
-
-      {/* {isConnecting && (
-        <div className='text-yellow-500 mb-4 animate-pulse'>
-          Connecting to space...
-        </div>
-      )} */}
-
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-7xl'>
-        {/* Local stream */}
-        {stream && (
-          <div className='relative aspect-video'>
-            <Player url={stream} muted={true} playing={true} playerId={myId} />
-            <span className='absolute bottom-2 left-2 bg-black/50 text-white px-2 py-1 rounded'>
-              You
-            </span>
+  if (!stream) {
+    return (
+      <div className='min-h-screen h-full flex items-center justify-center p-4'>
+        {!stream && (
+          <div className='text-foreground text-4xl mb-4 animate-pulse'>
+            Connecting to space...
           </div>
         )}
+      </div>
+    );
+  }
 
-        {/* Remote streams */}
+  const myId = "1234";
+
+  return (
+    <div className='min-h-screen h-full flex flex-col items-center justify-center p-4'>
+      {/* Local stream */}
+      {stream && (
+        <div>
+          <Player url={stream} muted={true} playing={true} playerId={myId} />
+        </div>
+      )}
+      <br />
+      <br />
+      {/* Remote streams */}
+      <div className='flex items-center justify-center gap-4 flex-wrap'>
         {Array.from(peerStreams.values()).map(
           ({ userId: peerId, stream: peerStream }) => (
             <div key={peerId} className='relative aspect-video'>
@@ -469,9 +485,6 @@ const Space = () => {
                 playing={true}
                 playerId={peerId}
               />
-              <span className='absolute bottom-2 left-2 bg-black/50 text-white px-2 py-1 rounded'>
-                Peer {peerId.slice(0, 4)}
-              </span>
             </div>
           )
         )}
