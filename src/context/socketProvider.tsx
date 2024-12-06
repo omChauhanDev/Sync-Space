@@ -16,7 +16,7 @@ interface SocketProviderProps {
 }
 
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
-  const socket = useMemo(() => io("http://localhost:8000/mediasoup"), []);
+  const socket = useMemo(() => io("http://18.61.177.202:8000/mediasoup"), []);
 
   return (
     <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
