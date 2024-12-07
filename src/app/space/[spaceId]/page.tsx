@@ -117,6 +117,7 @@ const Space = () => {
     // Get info that any producerAlreadyExist? in this space-router
     // Create device with routerRtpCapabilities
     const syncSpace = () => {
+      console.log('syncSpace function called');
       socket.emit("sync-space", { spaceId }, (data: any) => {
         console.log("Space->Router rtp capabilities", data.rtpCapabilities);
         routerRtpCapabilities = data.rtpCapabilities;
