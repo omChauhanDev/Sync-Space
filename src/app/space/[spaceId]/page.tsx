@@ -108,7 +108,7 @@ const Space = () => {
         "Successfully connected to socket with clientSocketId",
         socketIdClient
       );
-      // syncSpace();
+      syncSpace();
     };
 
     // Step 2:
