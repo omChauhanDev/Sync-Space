@@ -16,10 +16,19 @@ interface SocketProviderProps {
 }
 
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
-  const socket = useMemo(() => io("https://18.61.3.171:8000/mediasoup", {
-    secure: true,
-    rejectUnauthorized: false // WARNING: This disables SSL verification
-  }), []);
+  // const socket = useMemo(() => io("https://18.61.3.171:8000/mediasoup", {
+  const socket = useMemo(
+    () =>
+      io(
+        "https://18.61.3.171:8000/mediasoup"
+        // ,
+        // {
+        //   secure: true,
+        //   rejectUnauthorized: false, // WARNING: This disables SSL verification
+        // }
+      ),
+    []
+  );
 
   return (
     <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
