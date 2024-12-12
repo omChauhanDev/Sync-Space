@@ -21,10 +21,12 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     () =>
       io(
         "https://18.61.3.171:8000/mediasoup"
+        // "https://localhost:8000/mediasoup"
         // ,
         // {
-        //   secure: true,
-        //   rejectUnauthorized: false, // WARNING: This disables SSL verification
+        // transports: ["websocket"], // Force WebSocket transport
+        // rejectUnauthorized: false, // Required for self-signed certificates
+        // secure: true,
         // }
       ),
     []

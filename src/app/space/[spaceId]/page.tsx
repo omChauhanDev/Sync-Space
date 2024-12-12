@@ -91,6 +91,8 @@ const Space = () => {
     new Map()
   );
 
+  const [deviceCreated, setDeviceCreated] = useState(false);
+
   useEffect(() => {
     console.log(
       "Peer Stream updated, total existing peer streams",
@@ -117,7 +119,7 @@ const Space = () => {
     // Get info that any producerAlreadyExist? in this space-router
     // Create device with routerRtpCapabilities
     const syncSpace = () => {
-      console.log('syncSpace function called');
+      console.log("syncSpace function called");
       socket.emit("sync-space", { spaceId }, (data: any) => {
         console.log("Space->Router rtp capabilities", data.rtpCapabilities);
         routerRtpCapabilities = data.rtpCapabilities;
@@ -127,6 +129,7 @@ const Space = () => {
         if (data.isProducerExist) {
           consumeExistingProducers();
         }
+        setDeviceCreated(true);
       });
     };
 
@@ -336,7 +339,7 @@ const Space = () => {
 
   // For Producer
   useEffect(() => {
-    if (!stream || !socket) {
+    if (!stream || !socket || !deviceCreated) {
       console.log("Waiting for dependencies:");
       return;
     }
@@ -449,7 +452,7 @@ const Space = () => {
     };
     console.log("All dependencies ready, creating producer transport");
     createSendTransport();
-  }, [stream, socket]);
+  }, [stream, socket, deviceCreated]);
 
   if (!stream) {
     return (
