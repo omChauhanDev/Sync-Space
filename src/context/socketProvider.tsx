@@ -1,3 +1,4 @@
+// Restricted for multiple socket connections
 "use client";
 import React, {
   createContext,
@@ -30,7 +31,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     // Only create a new socket if one doesn't exist
     if (!socketRef.current) {
       socketRef.current = io(
-        "https://localhost:8000/mediasoup"
+        "https://18.61.3.171:8000/mediasoup"
         // , {
         // Add any socket.io options here
         //   transports: ["websocket"],
