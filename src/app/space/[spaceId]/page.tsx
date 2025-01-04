@@ -332,6 +332,12 @@ const Space = () => {
   ) => {
     try {
       await addTrackToUserMedia(producerPersonalData, kind, track);
+      // if (kind === "video") {
+      //   setNoOfLiveVideoTracks((prev) => prev + 1);
+      // }
+      console.log(
+        `##########${kind} track updated to UserMedia for ${producerPersonalData.email}`
+      );
     } catch (error) {
       console.error("Error adding track to user media:", error);
     }
@@ -339,8 +345,15 @@ const Space = () => {
 
   const removeTrack = async (remoteProducerId: string) => {
     try {
+      console.log("removeTrack called with params:", { remoteProducerId });
       const currentMap = producerMapRef.current;
+      console.log("Current map state:", {
+        size: currentMap.size,
+        entries: Array.from(currentMap.entries()),
+      });
       const producerData = currentMap.get(remoteProducerId);
+      console.log("Fetching Producer ID:", remoteProducerId);
+      console.log("Producer Data:", producerData);
 
       if (!producerData) {
         console.warn("Producer not found for ID:", remoteProducerId);
@@ -348,6 +361,8 @@ const Space = () => {
       }
 
       const { producerEmail, producerKind } = producerData;
+      console.log("Removing track from userMedia for user :", producerEmail);
+      console.log("Kind of track to be removed :", producerKind);
       // mapping clean up
       setProducerMap((prev) => {
         const updated = new Map(prev);
@@ -356,6 +371,12 @@ const Space = () => {
         return updated;
       });
       await removeTrackFromUserMedia(producerEmail, producerKind);
+      // if (producerKind === "video") {
+      //   setNoOfLiveVideoTracks((prev) => prev - 1);
+      // }
+      console.log(
+        `()()()()${producerKind} track updated to UserMedia for ${producerEmail}`
+      );
     } catch (error) {
       console.error("Error removing track from user media:", error);
     }
@@ -371,18 +392,24 @@ const Space = () => {
         const existingEntry = updated.get(socketId);
 
         if (existingEntry) {
+          // Update existing entry
           updated.set(socketId, userData);
         } else {
+          // Create a new entry with the provided track and null for the other
           updated.set(socketId, userData);
         }
         allMembersRef.current = updated;
-        return updated;
+        console.log("Updated all members entries:", updated.size); // Debug log
+        return updated; // Return the updated map to trigger re-render
       });
       resolve();
     });
   };
 
   const removeUserFromAllMembersInSpace = async (targetSocketId: string) => {
+    console.log("REMOVING User from all Members called with params:", {
+      targetSocketId,
+    });
     if (!allMembersRef.current.has(targetSocketId)) {
       return;
     }
@@ -394,6 +421,7 @@ const Space = () => {
           updated.delete(targetSocketId);
         }
         allMembersRef.current = updated;
+        console.log("REMOVED User from all Members:", updated.size);
         return updated;
       });
       resolve();
@@ -406,6 +434,11 @@ const Space = () => {
     isTrackOn: boolean
   ) => {
     return new Promise<void>((resolve) => {
+      console.log("updateUserFromAllMembersInSpace called with params:", {
+        socketId,
+        producerKind,
+        isTrackOn,
+      });
       setAllMembersInSpace((prev) => {
         const updated = new Map(prev);
         const existing = updated.get(socketId);
@@ -424,6 +457,7 @@ const Space = () => {
           }
         }
         allMembersRef.current = updated;
+        console.log("Updated user media entries:", updated.size);
         return updated;
       });
       resolve();
@@ -437,6 +471,7 @@ const Space = () => {
   ) => {
     try {
       await updateUserFromAllMembersInSpace(socketId, producerKind, isTrackOn);
+      console.log("User updated successfully:", { allMembersRef });
     } catch (error) {
       console.error("Error updating user:", error);
     }
@@ -445,6 +480,7 @@ const Space = () => {
   const addUser = async (socketId: string, userData: UserData) => {
     try {
       await addUserToAllMembersInSpace(socketId, userData);
+      console.log("User added successfully:", userData);
     } catch (error) {
       console.error("Error adding user:", error);
     }
@@ -453,6 +489,7 @@ const Space = () => {
   const removeUser = async (targetSocketId: string) => {
     try {
       await removeUserFromAllMembersInSpace(targetSocketId);
+      console.log("User removed successfully:", targetSocketId);
     } catch (error) {
       console.error("Error removing user:", error);
     }
@@ -463,6 +500,11 @@ const Space = () => {
     remoteProducerKind: string,
     isTrackOn: boolean
   ) => {
+    console.log("pauseTrackFromUserMedia called with params:", {
+      remoteProducerEmail,
+      remoteProducerKind,
+      isTrackOn,
+    });
     if (!userMediaRef.current.has(remoteProducerEmail)) {
       return;
     }
@@ -492,6 +534,7 @@ const Space = () => {
           }
         }
         userMediaRef.current = updated;
+        console.log("Updated user media entries:", updated.size);
         return updated;
       });
       resolve();
@@ -504,26 +547,62 @@ const Space = () => {
     isTrackOn: boolean
   ) => {
     try {
+      console.log("TOGGLE TRACK called with params:", {
+        remoteProducerId,
+        socketId,
+        isTrackOn,
+      });
       const currentMap = producerMapRef.current;
+      console.log("Current map state:", {
+        size: currentMap.size,
+        entries: Array.from(currentMap.entries()),
+      });
       const producerData = currentMap.get(remoteProducerId);
+      // console.log("Fetching Producer ID:", remoteProducerId);
+      console.log("Producer Data:", producerData);
 
       if (!producerData) {
         console.warn("Producer not found for ID:", remoteProducerId);
         return;
       }
       const { producerEmail, producerKind } = producerData;
+      console.log("Pausing track from userMedia for user :", producerEmail);
+      console.log("Kind of track to be paused :", producerKind);
       updateUser(socketId, producerKind, isTrackOn);
+      // if (producerKind === "video") {
+      //   if (isTrackOn) {
+      //     setNoOfLiveVideoTracks((prev) => prev + 1);
+      //   } else {
+      //     setNoOfLiveVideoTracks((prev) => prev - 1);
+      //   }
+      // }
       await toggleTrackFromUserMedia(producerEmail, producerKind, isTrackOn);
+      console.log(
+        `()()()()${producerKind} track updated to UserMedia for ${producerEmail}`
+      );
     } catch (error) {
       console.error("Error pausing track from user media:", error);
     }
   };
 
+  // for debugging
   useEffect(() => {
+    console.log(
+      "@@@@@@@@ UserMedia updated:",
+      Array.from(userMediaRef.current.values())
+    );
+  }, [userMediaRef, userMediaRef.current]);
+
+  useEffect(() => {
+    console.log(
+      "@@@@@@@@@ All Members Ref updated:",
+      Array.from(allMembersRef.current.entries())
+    );
     const liveVideoTracks = Array.from(allMembersRef.current.values()).filter(
       (userData) => userData.isVideoOn
     ).length;
     setNoOfLiveVideoTracks(liveVideoTracks);
+    console.log("Final Updated No of Live Video Tracks:", liveVideoTracks);
   }, [allMembersRef, allMembersRef.current]);
 
   // For UI
@@ -531,6 +610,7 @@ const Space = () => {
     if (!isConnecting) return;
     if (!session || !stream) return;
     setIsConnecting(false);
+    console.log("Session and stream are available and made isConnecting false");
   }, [session, stream]);
 
   // // For toggle audio
@@ -556,12 +636,16 @@ const Space = () => {
         socket.emit("producer-resume", {
           producerId: videoProducer.id,
         });
+        // setNoOfLiveVideoTracks((prev) => prev + 1);
+        console.log("Video producer resumed");
       } else {
         await videoProducer.pause();
         // Inform server
         socket.emit("producer-pause", {
           producerId: videoProducer.id,
         });
+        // setNoOfLiveVideoTracks((prev) => prev - 1);
+        console.log("Video producer paused");
       }
     } catch (error) {
       console.error("Error toggling video:", error);
@@ -578,12 +662,14 @@ const Space = () => {
         socket.emit("producer-resume", {
           producerId: audioProducer.id,
         });
+        console.log("Audio producer resumed");
       } else {
         await audioProducer.pause();
         // Inform server
         socket.emit("producer-pause", {
           producerId: audioProducer.id,
         });
+        console.log("Audio producer paused");
       }
     } catch (error) {
       console.error("Error toggling audio:", error);
@@ -591,15 +677,23 @@ const Space = () => {
   };
 
   useEffect(() => {
+    console.log(
+      `%%%% USEEFFECT Toggling video triggered isVideoOn: ${isVideoOn} and isVideoProducerCreated: ${hasVideoProducerCreated}`
+    );
     updateUser(mySocketId, "video", isVideoOn);
     if (hasVideoProducerCreated) {
+      console.log("Sending video toggle event to server");
       toggleVideo();
     }
   }, [isVideoOn]);
 
   useEffect(() => {
+    console.log(
+      `%%%% USEEFFECT Toggling audio triggered isAudioOn: ${isAudioOn} and isAudioProducerCreated: ${hasAudioProducerCreated}`
+    );
     updateUser(mySocketId, "audio", isAudioOn);
     if (hasAudioProducerCreated) {
+      console.log("Sending audio toggle event to server");
       toggleAudio();
     }
   }, [isAudioOn]);
@@ -611,6 +705,10 @@ const Space = () => {
     // Step 1:
     // Client establish socket connection with server
     const handleSocketConnection = ({ socketId }: { socketId: string }) => {
+      console.log(
+        "Successfully connected to socket with clientSocketId",
+        socketId
+      );
       mySocketId = socketId;
       syncSpace();
     };
@@ -621,6 +719,7 @@ const Space = () => {
     // Get info that any producerAlreadyExist? in this space-router
     // Create device with routerRtpCapabilities
     const syncSpace = () => {
+      console.log("syncSpace function called");
       updateUserData();
       if (!userData) {
         console.error("No user data available");
@@ -636,14 +735,24 @@ const Space = () => {
 
           if (data.allMembersData?.length > 0) {
             try {
+              console.log(
+                `Adding ${data.allMembersData.length} existing members...`
+              );
+
               await Promise.all(
                 data.allMembersData.map(async ({ socketId, userData }) => {
                   await addUser(socketId, userData);
+                  console.log(`Added member with socketId: ${socketId}`);
                 })
               );
+
+              console.log("All existing members added successfully");
             } catch (error) {
               console.error("Failed to add existing members:", error);
+              // You might want to handle this error appropriately
             }
+          } else {
+            console.log("No existing members to add");
           }
 
           if (data.isProducerExist) {
@@ -664,6 +773,7 @@ const Space = () => {
       socketId: string;
       memberPersonalData: UserData;
     }) => {
+      console.log("New producer joined", producerId);
       signalNewConsumerTransport(producerId, memberPersonalData);
       addUser(socketId, memberPersonalData);
     };
@@ -692,6 +802,11 @@ const Space = () => {
               producerPersonalData: UserData;
             }>
           ) => {
+            console.log(
+              "############ Received all existing Producers producerIds",
+              producerIds
+            );
+
             // Use sequential processing to ensure all streams are added
             for (const producer of producerIds) {
               await signalNewConsumerTransport(
@@ -783,6 +898,7 @@ const Space = () => {
               reject(new Error(params.error));
               return;
             }
+            console.log("ConsumerTransport received from server:", params);
 
             try {
               consumer = await consumerTransport.consume({
@@ -803,10 +919,26 @@ const Space = () => {
               ];
 
               const { track } = consumer;
+              // const mediaStream = new MediaStream([track]);
+
               await socket.emit("consumer-resume", {
                 serverConsumerTransportId: params.serverConsumerId,
               });
 
+              // Ensure state update happens
+              // setVideoStreams((prev) => {
+              //   const updated = new Map(prev);
+              //   updated.set(consumer.producerId, {
+              //     // updated.set(producerPersonalData.email, {
+              //     // userId: consumer.producerId,
+              //     userData: producerPersonalData,
+              //     stream: mediaStream,
+              //   });
+              //   console.log("Updated peer streams:", updated.size); // Debug log
+              //   return updated;
+              // });
+
+              // addGivenStream(producerPersonalData, mediaStream);
               if (track.kind === "video") {
                 addTrack(producerPersonalData, "video", track);
                 console.log("$$$$$ Peer Video track added to userMedia");
@@ -823,6 +955,17 @@ const Space = () => {
               consumer.on("transportclose", () => {
                 console.log("Consumer transport closed");
               });
+
+              // For toggling track
+              // consumer.observer.on("pause", () => {
+              //   console.log(`Consumer OBSERVER EVENT : PAUSE`);
+              //   toggleTrack(consumer.producerId, false);
+              // });
+
+              // consumer.observer.on("resume", () => {
+              //   console.log(`Consumer OBSERVER EVENT : RESUME`);
+              //   toggleTrack(consumer.producerId, true);
+              // });
 
               resolve();
             } catch (consumeError) {
@@ -853,6 +996,10 @@ const Space = () => {
     }: {
       remoteProducerId: string;
     }) => {
+      console.log("handleProducerClosedConnection called with params:", {
+        remoteProducerId,
+      });
+      // Close the client client consumer and associated transport
       const producerToClose = consumerTransports.find(
         (transportData) => transportData.producerId === remoteProducerId
       );
@@ -865,6 +1012,59 @@ const Space = () => {
       removeTrack(remoteProducerId);
     };
 
+    // const handleToggleAudio = ({
+    //   remoteProducerId,
+    //   isMuted,
+    // }: {
+    //   remoteProducerId: string;
+    //   isMuted: boolean;
+    // }) => {
+    //   setVideoStreams((prev) => {
+    //     const updated = new Map(prev);
+    //     const existing = updated.get(remoteProducerId);
+    //     if (existing) {
+    //       updated.set(remoteProducerId, {
+    //         ...existing,
+    //         userData: {
+    //           ...existing.userData,
+    //           isMuted,
+    //         },
+    //       });
+    //     }
+    //     return updated;
+    //   });
+    // };
+
+    // const handleToggleVideo = ({
+    //   remoteProducerId,
+    //   isPlaying,
+    // }: {
+    //   remoteProducerId: string;
+    //   isPlaying: boolean;
+    // }) => {
+    //   console.log(
+    //     "handleToggleVideo Event received on client side:",
+    //     remoteProducerId,
+    //     isPlaying
+    //   );
+    //   setVideoStreams((prev) => {
+    //     console.log("prev", prev);
+    //     const updated = new Map(prev);
+    //     const existing = updated.get(remoteProducerId);
+    //     console.log("existing", existing);
+    //     if (existing) {
+    //       updated.set(remoteProducerId, {
+    //         ...existing,
+    //         userData: {
+    //           ...existing.userData,
+    //           isPlaying,
+    //         },
+    //       });
+    //     }
+    //     console.log("updated", updated);
+    //     return updated;
+    //   });
+    // };
     const handleProducerPauseResume = ({
       producerId,
       socketId,
@@ -874,6 +1074,11 @@ const Space = () => {
       socketId: string;
       isTrackOn: boolean;
     }) => {
+      console.log("handleProducerPauseResume called with params:", {
+        producerId,
+        socketId,
+        isTrackOn,
+      });
       toggleTrack(producerId, socketId, isTrackOn);
     };
 
@@ -884,8 +1089,11 @@ const Space = () => {
     socket.on("producer-closed-connection", handleProducerClosedConnection);
     socket.on("producer-pause", handleProducerPauseResume);
     socket.on("producer-resume", handleProducerPauseResume);
+    // socket.on("router-rtp-capabilities", receiveRouterRtpCapabilities);
+    // socket.on("createWbeRtcTransport", {sender: true}, );
 
     return () => {
+      // socket.off("connect");
       socket.off("client-connected", handleSocketConnection);
       socket.off("new-member-joined", handleNewMemberJoined);
       socket.off("member-left", handleMemberLeft);
@@ -893,17 +1101,201 @@ const Space = () => {
       socket.off("producer-closed-connection", handleProducerClosedConnection);
       socket.off("producer-pause", handleProducerPauseResume);
       socket.off("producer-resume", handleProducerPauseResume);
+
+      // socket.off("router-rtp-capabilities", receiveRouterRtpCapabilities);
     };
   }, [socket]);
 
+  // Org method to add stream to VideoStreams
+  // creating new promise to add stream to videoStreams
+  // const addMyStreamToVideoStreams = async () => {
+  //   if (!stream) {
+  //     return;
+  //   }
+  //   return new Promise<void>((resolve) => {
+  //     setVideoStreams((prev) => {
+  //       const updated = new Map(prev);
+  //       updated.set(userData.email, {
+  //         userData: userData,
+  //         stream: stream,
+  //       });
+  //       console.log("Updated video streams:", updated.size); // Debug log
+  //       return updated;
+  //     });
+  //     resolve();
+  //   });
+  // };
+
+  // For Producer
+  // useEffect(() => {
+  //   if (!stream || !socket || !deviceCreated) {
+  //     console.log("Waiting for dependencies:");
+  //     return;
+  //   }
+
+  //   addGivenStream(userData, stream);
+
+  //   // ORG : Just for video
+  //   // const connectSendTransport = async () => {
+  //   //   try {
+  //   //     // For Video Track
+  //   //     const track = stream?.getVideoTracks()[0];
+  //   //     console.log("Got video track:", !!track);
+
+  //   //     producer = await producerTransport.produce({
+  //   //       ...params,
+  //   //       track,
+  //   //       appData: { mediaTag: "cam-video" },
+  //   //     });
+
+  //   //     console.log("Producer created successfully");
+
+  //   //     // Now, on creating producer server notified existing peers about this producer
+  //   //     // setIsProducerCreated(true);
+
+  //   //     producer.on("trackended", () => {
+  //   //       console.log("Track ended");
+  //   //     });
+
+  //   //     producer.on("transportclose", () => {
+  //   //       console.log("Producer transport closed");
+  //   //     });
+  //   //   } catch (error) {
+  //   //     console.error("Error in connectSendTransport:", error);
+  //   //   }
+  //   // };
+
+  //   // Modified : For video and audio
+
+  //   const createSendTransport = async () => {
+  //     await socket.emit(
+  //       "createWebRtcTransport",
+  //       { consumer: false },
+  //       ({ params }: { params: TransportCallbackParams }) => {
+  //         if (params.error) {
+  //           console.log(`Error while creating send transport: ${params.error}`);
+  //           return;
+  //         }
+  //         console.log("Transport received from server:", params);
+
+  //         // Making Client ProducerTransport from transport received from server
+  //         producerTransport = device.createSendTransport(params);
+
+  //         producerTransport.on(
+  //           "connect",
+  //           async ({ dtlsParameters }, callback, errback) => {
+  //             try {
+  //               // sending dtls parameters to server
+  //               await socket.emit("transport-connect", {
+  //                 // transportId: producerTransport.id,
+  //                 dtlsParameters: dtlsParameters,
+  //               });
+  //               console.log("transport-connect event received on server");
+  //               // telling transport that parameters were transmitted to server
+  //               callback();
+  //             } catch (error) {
+  //               errback(error as Error);
+  //             }
+  //           }
+  //         );
+
+  //         producerTransport.on(
+  //           "produce",
+  //           async (parameters, callback, errback) => {
+  //             console.log("producerTransport.on produce", parameters);
+
+  //             try {
+  //               await socket.emit(
+  //                 "transport-produce",
+  //                 {
+  //                   // transportId: producerTransport.id,
+  //                   kind: parameters.kind,
+  //                   rtpParameters: parameters.rtpParameters,
+  //                   appData: parameters.appData,
+  //                 },
+  //                 ({ id }: { id: string }) => {
+  //                   // Telling the transport that parameters were sent
+  //                   // and this is our server side producer's id
+  //                   callback({ id });
+  //                 }
+  //               );
+  //             } catch (error) {
+  //               errback(error as Error);
+  //             }
+  //           }
+  //         );
+  //         console.log("producerTransport created successfully");
+  //         console.log("connecting producer");
+  //         connectSendTransport();
+  //       }
+  //     );
+  //   };
+  //   console.log("All dependencies ready, creating producer transport");
+  //   createSendTransport();
+  // }, [stream, socket, deviceCreated]);
+
   useEffect(() => {
     if (!stream || !socket || !deviceCreated) {
+      // console.log("Waiting for dependencies:");
       return;
     }
 
     if (!socket.connected) {
+      // console.log("Socket exists but not connected, waiting for connection...");
       return;
     }
+
+    // const connectSendTransport = async () => {
+    //   try {
+    //     // Produce video track
+    //     const videoTrack = stream?.getVideoTracks()[0];
+    //     // console.log("Got video track:", !!videoTrack);
+
+    //     // if (isVideoOn && videoTrack) {
+    //     const videoProducer = await producerTransport.produce({
+    //       ...params,
+    //       track: videoTrack,
+    //       appData: { mediaTag: "cam-video" },
+    //     });
+    //     addTrack(userData, "video", stream?.getVideoTracks()[0]);
+    //     setVideoProducer(videoProducer);
+    //     setHasVideoProducerCreated(true);
+    //     console.log("Video Produced to server successfully");
+
+    //     videoProducer.on("trackended", () => {
+    //       console.log("Video track ended");
+    //     });
+
+    //     videoProducer.on("transportclose", () => {
+    //       console.log("Video producer transport closed");
+    //     });
+    //     // }
+
+    //     // Produce audio track
+    //     const audioTrack = stream?.getAudioTracks()[0];
+    //     console.log("Got audio track:", !!audioTrack);
+
+    //     // if (isAudioOn && audioTrack) {
+    //     const audioProducer = await producerTransport.produce({
+    //       ...params,
+    //       track: audioTrack,
+    //       appData: { mediaTag: "cam-audio" },
+    //     });
+    //     setAudioProducer(audioProducer);
+    //     setHasAudioProducerCreated(true);
+
+    //     audioProducer.on("trackended", () => {
+    //       console.log("Audio track ended");
+    //     });
+
+    //     audioProducer.on("transportclose", () => {
+    //       console.log("Audio producer transport closed");
+    //     });
+    //     // }
+    //   } catch (error) {
+    //     console.error("Error in connectSendTransport:", error);
+    //   }
+    // };
 
     const createSendTransport = async () => {
       await socket.emit(
@@ -914,6 +1306,7 @@ const Space = () => {
             console.log(`Error while creating send transport: ${params.error}`);
             return;
           }
+          // console.log("Transport received from server:", params);
 
           // Making Client ProducerTransport from transport received from server
           producerTransport = device.createSendTransport(params);
@@ -925,6 +1318,7 @@ const Space = () => {
                 await socket.emit("transport-connect", {
                   dtlsParameters: dtlsParameters,
                 });
+                // console.log("transport-connect event received on server");
                 callback();
               } catch (error) {
                 errback(error as Error);
@@ -935,6 +1329,8 @@ const Space = () => {
           producerTransport.on(
             "produce",
             async (parameters, callback, errback) => {
+              // console.log("producerTransport.on produce", parameters);
+
               try {
                 await socket.emit(
                   "transport-produce",
@@ -952,11 +1348,15 @@ const Space = () => {
               }
             }
           );
-
+          // console.log("producerTransport created successfully");
+          // console.log("connecting producer");
+          // connectSendTransport();
           setProducerTransportCreated(true);
         }
       );
     };
+
+    console.log("All dependencies ready, creating producer transport");
     createSendTransport();
   }, [stream, socket, deviceCreated]);
 
@@ -974,10 +1374,15 @@ const Space = () => {
       addTrack(userData, "video", stream?.getVideoTracks()[0]);
       setVideoProducer(videoProducer);
       setHasVideoProducerCreated(true);
+      console.log("Video Produced to server successfully");
 
-      videoProducer.on("trackended", () => {});
+      videoProducer.on("trackended", () => {
+        console.log("Video track ended");
+      });
 
-      videoProducer.on("transportclose", () => {});
+      videoProducer.on("transportclose", () => {
+        console.log("Video producer transport closed");
+      });
     } catch (error) {
       console.error("Error in createVideoProducer:", error);
     }
@@ -986,7 +1391,9 @@ const Space = () => {
   const createAudioProducer = async () => {
     try {
       const audioTrack = stream?.getAudioTracks()[0];
+      console.log("Got audio track:", !!audioTrack);
 
+      // if (isAudioOn && audioTrack) {
       const audioProducer = await producerTransport.produce({
         ...params,
         track: audioTrack,
@@ -994,10 +1401,15 @@ const Space = () => {
       });
       setAudioProducer(audioProducer);
       setHasAudioProducerCreated(true);
+      console.log("Audio Produced to server successfully");
 
-      audioProducer.on("trackended", () => {});
+      audioProducer.on("trackended", () => {
+        console.log("Audio track ended");
+      });
 
-      audioProducer.on("transportclose", () => {});
+      audioProducer.on("transportclose", () => {
+        console.log("Audio producer transport closed");
+      });
     } catch (error) {
       console.error("Error in createAudioProducer:", error);
     }
@@ -1021,6 +1433,217 @@ const Space = () => {
       createAudioProducer();
     }
   }, [isAudioOn, producerTransportCreated]);
+
+  // useEffect(() => {
+  //   if (!stream || !socket || !deviceCreated) {
+  //     return;
+  //   }
+
+  //   if (!socket.connected) {
+  //     return;
+  //   }
+  // },[stream, socket, deviceCreated]);
+
+  // // First useEffect - handles audio producer creation
+  // useEffect(() => {
+  //   if (!stream || !socket || !deviceCreated) {
+  //     return;
+  //   }
+
+  //   if (!socket.connected) {
+  //     return;
+  //   }
+
+  //   const createAudioProducer = async (transport: Transport) => {
+  //     const audioTrack = stream?.getAudioTracks()[0];
+
+  //     if (audioTrack) {
+  //       const audioProducer = await transport.produce({
+  //         ...params,
+  //         track: audioTrack,
+  //         appData: { mediaTag: "cam-audio" },
+  //       });
+
+  //       setIsAudioProducerCreated(true);
+
+  //       audioProducer.on("trackended", () => {
+  //         console.log("Audio track ended");
+  //       });
+
+  //       audioProducer.on("transportclose", () => {
+  //         console.log("Audio producer transport closed");
+  //       });
+  //     }
+  //   };
+
+  //   const createSendTransport = async () => {
+  //     await socket.emit(
+  //       "createWebRtcTransport",
+  //       { consumer: false },
+  //       ({ params }: { params: TransportCallbackParams }) => {
+  //         if (params.error) {
+  //           console.log(`Error while creating send transport: ${params.error}`);
+  //           return;
+  //         }
+
+  //         producerTransport = device.createSendTransport(params);
+
+  //         producerTransport.on(
+  //           "connect",
+  //           async ({ dtlsParameters }, callback, errback) => {
+  //             try {
+  //               await socket.emit("transport-connect", {
+  //                 dtlsParameters: dtlsParameters,
+  //               });
+  //               callback();
+  //             } catch (error) {
+  //               errback(error as Error);
+  //             }
+  //           }
+  //         );
+
+  //         producerTransport.on(
+  //           "produce",
+  //           async (parameters, callback, errback) => {
+  //             try {
+  //               await socket.emit(
+  //                 "transport-produce",
+  //                 {
+  //                   kind: parameters.kind,
+  //                   rtpParameters: parameters.rtpParameters,
+  //                   appData: parameters.appData,
+  //                 },
+  //                 ({ id }: { id: string }) => {
+  //                   callback({ id });
+  //                 }
+  //               );
+  //             } catch (error) {
+  //               errback(error as Error);
+  //             }
+  //           }
+  //         );
+
+  //         // Only create audio producer initially
+  //         createAudioProducer(producerTransport);
+  //       }
+  //     );
+  //   };
+
+  //   console.log("Creating initial producer transport for audio");
+  //   createSendTransport();
+  // }, [stream, socket, deviceCreated]);
+
+  // // Second useEffect - handles video producer creation and cleanup
+  // // useEffect(() => {
+  // //   if (!stream || !socket || !deviceCreated || !producerTransport) {
+  // //     return;
+  // //   }
+  // //   console.log("VIDEO USEEFFECT TRIGGERED");
+
+  // //   let videoProducer: Producer | null = null;
+
+  // //   const handleVideoProducer = async () => {
+  // //     const videoTrack = stream?.getVideoTracks()[0];
+
+  // //     if (isVideoOn && videoTrack) {
+  // //       console.log("Creating video producer");
+  // //       addTrack(userData, "video", videoTrack);
+
+  // //       try {
+  // //         videoProducer = await producerTransport.produce({
+  // //           ...params,
+  // //           track: videoTrack,
+  // //           appData: { mediaTag: "cam-video" },
+  // //         });
+
+  // //         setIsVideoProducerCreated(true);
+
+  // //         videoProducer.on("trackended", () => {
+  // //           console.log("Video track ended");
+  // //         });
+
+  // //         videoProducer.on("transportclose", () => {
+  // //           console.log("Video producer transport closed");
+  // //         });
+  // //       } catch (error) {
+  // //         console.error("Error creating video producer:", error);
+  // //       }
+  // //     } else if (!isVideoOn && videoProducer) {
+  // //       console.log("Closing video producer");
+  // //       await videoProducer.close();
+  // //       videoProducer = null;
+  // //       setIsVideoProducerCreated(false);
+  // //     }
+  // //   };
+
+  // //   handleVideoProducer();
+
+  // //   // Cleanup function
+  // //   // return () => {
+  // //   //   if (videoProducer) {
+  // //   //     console.log("Cleaning up video producer");
+  // //   //     videoProducer.close();
+  // //   //   }
+  // //   // };
+  // // }, [stream, socket, deviceCreated, isVideoOn, producerTransport]);
+  // useEffect(() => {
+  //   if (!stream || !socket || !deviceCreated || !producerTransport) {
+  //     return;
+  //   }
+  //   console.log("VIDEO USEEFFECT TRIGGERED");
+
+  //   const handleVideoProducer = async () => {
+  //     const videoTrack = stream?.getVideoTracks()[0];
+
+  //     // Case 1: Video should be ON
+  //     if (isVideoOn && videoTrack) {
+  //       // Only create new producer if we don't have one
+  //       if (!videoProducerRef.current) {
+  //         console.log("Creating video producer");
+  //         addTrack(userData, "video", videoTrack);
+
+  //         try {
+  //           videoProducerRef.current = await producerTransport.produce({
+  //             ...params,
+  //             track: videoTrack,
+  //             appData: { mediaTag: "cam-video" },
+  //           });
+
+  //           setIsVideoProducerCreated(true);
+
+  //           videoProducerRef.current.on("trackended", () => {
+  //             console.log("Video track ended");
+  //           });
+
+  //           videoProducerRef.current.on("transportclose", () => {
+  //             console.log("Video producer transport closed");
+  //           });
+  //         } catch (error) {
+  //           console.error("Error creating video producer:", error);
+  //         }
+  //       }
+  //     }
+  //     // Case 2: Video should be OFF
+  //     else if (!isVideoOn && videoProducerRef.current) {
+  //       console.log("Closing video producer");
+  //       videoProducerRef.current.close();
+  //       videoProducerRef.current = null;
+  //       setIsVideoProducerCreated(false);
+  //     }
+  //   };
+
+  //   handleVideoProducer();
+
+  //   // Cleanup function is important for component unmount
+  //   // return () => {
+  //   //   if (videoProducerRef.current) {
+  //   //     console.log("Cleaning up video producer on unmount");
+  //   //     videoProducerRef.current.close();
+  //   //     videoProducerRef.current = null;
+  //   //     setIsVideoProducerCreated(false);
+  //   //   }
+  //   // };
+  // }, [stream, socket, deviceCreated, isVideoOn, producerTransport]);
 
   if (isConnecting) {
     return (
