@@ -723,6 +723,7 @@ const Space = () => {
       updateUserData();
       if (!userData) {
         console.error("No user data available");
+
         setIsConnecting(true);
         return;
       }
@@ -1082,6 +1083,8 @@ const Space = () => {
       toggleTrack(producerId, socketId, isTrackOn);
     };
 
+    // syncSpace();
+
     socket.on("client-connected", handleSocketConnection);
     socket.on("new-member-joined", handleNewMemberJoined);
     socket.on("member-left", handleMemberLeft);
@@ -1104,7 +1107,7 @@ const Space = () => {
 
       // socket.off("router-rtp-capabilities", receiveRouterRtpCapabilities);
     };
-  }, [socket]);
+  }, [socket, session?.user, status]);
 
   // Org method to add stream to VideoStreams
   // creating new promise to add stream to videoStreams
