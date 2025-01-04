@@ -14,6 +14,17 @@ body {
     @apply bg-background text-foreground;
   }
 }
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}
 
 .nav {
   @apply bg-[#09090b];
@@ -27,9 +38,9 @@ body {
     --card-foreground: 240 10% 3.9%; /* Dark Charcoal */
     --popover: 0 0% 100%; /* White */
     --popover-foreground: 240 10% 3.9%; /* Dark Charcoal */
-    --primary: 12 90% 55%; /* Cinnabar */
+    --primary: 258 100% 51%; /* Violet 258 100% 51%*/
     --primary-foreground: 0 0% 98%; /* Light Text */
-    --secondary: 60 100% 94%; /* Beige */
+    --secondary: 312deg 100% 44%; /* Beige */
     --secondary-foreground: 240 10% 3.9%; /* Dark Charcoal */
     --muted: 240 4.8% 95.9%; /* Light Gray */
     --muted-foreground: 240 3.8% 46.1%; /* Medium Gray */
@@ -55,9 +66,11 @@ body {
     --card-foreground: 0 0% 98%; /* Off-White */
     --popover: 240 10% 3.9%; /* Dark Charcoal */
     --popover-foreground: 0 0% 98%; /* Off-White */
-    --primary: 12 90% 55%; /* Light */
+    /* --primary: 221 83% 53%; /* Light */
+    --primary: 194 100% 34%;
     --primary-foreground: 240 5.9% 10%; /* Charcoal */
-    --secondary: 240 3.7% 15.9%; /* Dark Beige */
+    --secondary: 312deg 100% 44%; /* Pink */
+    /* --secondary: 240 3.7% 15.9%; Dark Beige */
     --secondary-foreground: 0 0% 98%; /* Light Foreground */
     --muted: 240 3.7% 15.9%; /* Dark Muted */
     --muted-foreground: 240 5% 64.9%; /* Gray */

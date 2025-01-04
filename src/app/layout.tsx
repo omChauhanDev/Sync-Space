@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "./components/ThemeProvider";
+import { SessionProvider } from "next-auth/react";
+import { Toaster as UiToaster } from "@/components/ui/toaster"; // Your custom Toaster component
+import { Toaster as ReactHotToaster } from "react-hot-toast"; // React Hot Toast Toaster component
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -29,14 +32,20 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute='class'
-          defaultTheme='light'
-          enableSystem
-          disableTransitionOnChange
-        >
-          <div>{children}</div>
-        </ThemeProvider>
+        <SessionProvider>
+          <div>
+            <ReactHotToaster />
+          </div>
+          <ThemeProvider
+            attribute='class'
+            defaultTheme='light'
+            enableSystem
+            disableTransitionOnChange
+          >
+            <div>{children}</div>
+          </ThemeProvider>
+          <UiToaster />
+        </SessionProvider>
       </body>
     </html>
   );

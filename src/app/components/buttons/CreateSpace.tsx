@@ -13,9 +13,14 @@ const CreateSpace = () => {
     router.push(`space/${roomId}`);
   };
   return (
-    <Button onClick={createSpaceHandler} className='w-full'>
-      <Rocket /> Create Space
-    </Button>
+    <div className='bg-background w-full'>
+      <Button
+        onClick={createSpaceHandler}
+        className='w-full bg-cinnabar hover:bg-cinnabar/80'
+      >
+        <Rocket /> Create Space
+      </Button>
+    </div>
   );
 };
 

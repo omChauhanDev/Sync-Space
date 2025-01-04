@@ -11,7 +11,7 @@ export default function Home() {
       <NavBar />
       <div className='min-h-screen h-full flex items-center justify-center'>
         <BgPattern />
-        <section className='grid h-full md:px-20 px-7 flex-1 md:grid-cols-8 w-[90%] items-center justify-center gap-8 mx-auto grid-cols-1'>
+        <section className='z-10 grid h-full md:px-20 px-7 flex-1 md:grid-cols-8 w-[90%] items-center justify-center gap-8 mx-auto grid-cols-1'>
           <div className='md:pl-16 h-full flex flex-col items-center justify-center col-span-3 gap-12'>
             <h1 className='text-4xl bg-background'>
               Connect with Anyone, Anywhere
@@ -29,8 +29,6 @@ export default function Home() {
               width={1000}
               height={1000}
               src={rightPattern}
-              // className='bg-background'
-              // sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
             />
           </div>
         </section>

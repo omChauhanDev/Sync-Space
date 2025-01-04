@@ -1,6 +1,7 @@
 import Image from "next/image";
 import illustration from "../../../public/BgOnlyPattern.png";
 export default function BgPattern() {
+  console.log("BgPattern render");
   return (
     <Image
       alt='Pattern'
@@ -13,7 +14,7 @@ export default function BgPattern() {
       style={{
         objectFit: "cover",
         // top: 60,
-        zIndex: -1,
+        zIndex: 1,
       }}
     />
   );

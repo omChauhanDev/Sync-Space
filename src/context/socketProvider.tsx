@@ -1,5 +1,12 @@
 "use client";
-import React, { createContext, useMemo, useContext, ReactNode } from "react";
+import React, {
+  createContext,
+  useMemo,
+  useContext,
+  useRef,
+  useEffect,
+  ReactNode,
+} from "react";
 import { io, Socket } from "socket.io-client";
 
 type SocketContextType = Socket | null;
@@ -16,21 +23,45 @@ interface SocketProviderProps {
 }
 
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
-  // const socket = useMemo(() => io("https://18.61.3.171:8000/mediasoup", {
-  const socket = useMemo(
-    () =>
-      io(
-        "https://18.61.3.171:8000/mediasoup"
-        // "https://localhost:8000/mediasoup"
-        // ,
-        // {
-        // transports: ["websocket"], // Force WebSocket transport
-        // rejectUnauthorized: false, // Required for self-signed certificates
-        // secure: true,
+  // Use useRef to maintain a single socket instance across re-renders
+  const socketRef = useRef<Socket | null>(null);
+
+  const socket = useMemo(() => {
+    // Only create a new socket if one doesn't exist
+    if (!socketRef.current) {
+      socketRef.current = io(
+        "https://localhost:8000/mediasoup"
+        // , {
+        // Add any socket.io options here
+        //   transports: ["websocket"],
+        //   reconnection: true,
+        //   reconnectionAttempts: 5,
+        //   reconnectionDelay: 1000,
         // }
-      ),
-    []
-  );
+      );
+
+      // Log connection events
+      socketRef.current.on("connect", () => {
+        console.log("Socket connected:", socketRef.current?.id);
+      });
+
+      socketRef.current.on("disconnect", (reason) => {
+        console.log("Socket disconnected:", reason);
+      });
+    }
+    return socketRef.current;
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (socketRef.current) {
+        console.log("Cleaning up socket connection");
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>

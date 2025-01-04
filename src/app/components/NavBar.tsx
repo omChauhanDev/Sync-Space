@@ -17,11 +17,11 @@ const NavBar = () => {
           </span>
         </a>
         <div className='block w-auto'>
-          <ul className='font-medium p-0 flex rounded-lg flex-row space-x-8 rtl:space-x-reverse'>
+          <ul className='font-medium p-0 flex rounded-lg flex-row gap-4 rtl:space-x-reverse items-center justify-center'>
             <li className='flex justify-center items-center'>
               <AuthButton />
             </li>
-            <li>
+            <li className='flex justify-center items-center'>
               <ModeToggle />
             </li>
           </ul>
