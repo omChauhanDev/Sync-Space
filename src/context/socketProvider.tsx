@@ -32,6 +32,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     if (!socketRef.current) {
       socketRef.current = io(
         "https://18.61.3.171:8000/mediasoup"
+        // "https://localhost:8000/mediasoup"
         // , {
         // Add any socket.io options here
         //   transports: ["websocket"],

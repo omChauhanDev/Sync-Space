@@ -602,16 +602,15 @@ const Space = () => {
       (userData) => userData.isVideoOn
     ).length;
     setNoOfLiveVideoTracks(liveVideoTracks);
-    console.log("Final Updated No of Live Video Tracks:", liveVideoTracks);
   }, [allMembersRef, allMembersRef.current]);
 
   // For UI
-  useEffect(() => {
-    if (!isConnecting) return;
-    if (!session || !stream) return;
-    setIsConnecting(false);
-    console.log("Session and stream are available and made isConnecting false");
-  }, [session, stream]);
+  // useEffect(() => {
+  //   if (!isConnecting) return;
+  //   if (!session || !stream) return;
+  //   setIsConnecting(false);
+  //   console.log("Session and stream are available and made isConnecting false");
+  // }, [session, stream]);
 
   // // For toggle audio
   // useEffect(() => {
@@ -723,7 +722,6 @@ const Space = () => {
       updateUserData();
       if (!userData) {
         console.error("No user data available");
-
         setIsConnecting(true);
         return;
       }
@@ -748,6 +746,7 @@ const Space = () => {
               );
 
               console.log("All existing members added successfully");
+              setIsConnecting(false);
             } catch (error) {
               console.error("Failed to add existing members:", error);
               // You might want to handle this error appropriately
@@ -1083,8 +1082,6 @@ const Space = () => {
       toggleTrack(producerId, socketId, isTrackOn);
     };
 
-    // syncSpace();
-
     socket.on("client-connected", handleSocketConnection);
     socket.on("new-member-joined", handleNewMemberJoined);
     socket.on("member-left", handleMemberLeft);
@@ -1107,7 +1104,7 @@ const Space = () => {
 
       // socket.off("router-rtp-capabilities", receiveRouterRtpCapabilities);
     };
-  }, [socket, session?.user, status]);
+  }, [socket]);
 
   // Org method to add stream to VideoStreams
   // creating new promise to add stream to videoStreams
