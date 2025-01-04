@@ -1104,7 +1104,7 @@ const Space = () => {
 
       // socket.off("router-rtp-capabilities", receiveRouterRtpCapabilities);
     };
-  }, [socket]);
+  }, [socket, session]);
 
   // Org method to add stream to VideoStreams
   // creating new promise to add stream to videoStreams
