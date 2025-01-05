@@ -6,12 +6,20 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import toast from "react-hot-toast";
+import { SendInvite } from "./modals/SendInvite";
 
-const InvitePeople = () => {
+const InvitePeople = ({
+  setIsOpen = undefined,
+}: {
+  setIsOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
   const spaceLink = window.location.href;
   const spaceId = spaceLink.split("/space/")[1];
   const copyToClipboard = async (type: "spaceId" | "spaceLink") => {
     try {
+      if (setIsOpen) {
+        setIsOpen(false);
+      }
       if (type === "spaceId") {
         await navigator.clipboard.writeText(spaceId);
         toast.success(
@@ -61,10 +69,7 @@ const InvitePeople = () => {
           <FontAwesomeIcon icon={faCopy} className='mr-2' />
           Copy Invite Link
         </button>
-        <button className='btn btn-outline btn-secondary'>
-          <FontAwesomeIcon icon={faEnvelope} className='mr-2' />
-          Share via Email
-        </button>
+        <SendInvite />
       </div>
     </div>
   );

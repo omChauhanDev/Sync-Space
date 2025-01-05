@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 
 interface ModalProps {
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   trigger: ReactNode;
   content: ReactNode;
   className?: string;
@@ -10,13 +12,14 @@ interface ModalProps {
 }
 
 const Modal = ({
+  isOpen,
+  setIsOpen,
   trigger,
   content,
   className = "",
   contentClassName = "",
   showCloseButton = true,
 }: ModalProps) => {
-  const [isOpen, setIsOpen] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {

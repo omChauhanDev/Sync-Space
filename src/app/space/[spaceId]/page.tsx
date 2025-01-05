@@ -106,9 +106,18 @@ const Space = () => {
   // Current User
   const { stream } = useMediaStream();
   const { data: session, status } = useSession();
+  // Get URL parameters for initial preferences
+  const searchParams =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search)
+      : new URLSearchParams("");
 
-  const [isAudioOn, setIsAudioOn] = useState(false);
-  const [isVideoOn, setIsVideoOn] = useState(false);
+  const initialAudio = searchParams.get("initialAudio") === "true";
+  const initialVideo = searchParams.get("initialVideo") === "true";
+
+  // Update state initializations with URL preferences
+  const [isAudioOn, setIsAudioOn] = useState(initialAudio);
+  const [isVideoOn, setIsVideoOn] = useState(initialVideo);
   const [isConnecting, setIsConnecting] = useState(true);
   const [hasAudioProducerCreated, setHasAudioProducerCreated] = useState(false);
   const [hasVideoProducerCreated, setHasVideoProducerCreated] = useState(false);
@@ -604,27 +613,6 @@ const Space = () => {
     setNoOfLiveVideoTracks(liveVideoTracks);
   }, [allMembersRef, allMembersRef.current]);
 
-  // For UI
-  // useEffect(() => {
-  //   if (!isConnecting) return;
-  //   if (!session || !stream) return;
-  //   setIsConnecting(false);
-  //   console.log("Session and stream are available and made isConnecting false");
-  // }, [session, stream]);
-
-  // // For toggle audio
-  // useEffect(() => {
-  //   console.log("For toggling audio :");
-  //   if (isProducerCreated) {
-  //     console.log("Sending audio toggle event to server");
-  //     socket?.emit("toggle-audio", { isMuted });
-  //     console.log("############Our video Stream", videoStreams);
-  //     console.log("############ React State for muted", isMuted);
-  //     console.log("############ React State for playing", isPlaying);
-  //   }
-  // }, [isMuted, isProducerCreated]);
-
-  // // For toggling video
   const toggleVideo = async () => {
     if (!videoProducer || !socket) return;
 
@@ -1012,59 +1000,6 @@ const Space = () => {
       removeTrack(remoteProducerId);
     };
 
-    // const handleToggleAudio = ({
-    //   remoteProducerId,
-    //   isMuted,
-    // }: {
-    //   remoteProducerId: string;
-    //   isMuted: boolean;
-    // }) => {
-    //   setVideoStreams((prev) => {
-    //     const updated = new Map(prev);
-    //     const existing = updated.get(remoteProducerId);
-    //     if (existing) {
-    //       updated.set(remoteProducerId, {
-    //         ...existing,
-    //         userData: {
-    //           ...existing.userData,
-    //           isMuted,
-    //         },
-    //       });
-    //     }
-    //     return updated;
-    //   });
-    // };
-
-    // const handleToggleVideo = ({
-    //   remoteProducerId,
-    //   isPlaying,
-    // }: {
-    //   remoteProducerId: string;
-    //   isPlaying: boolean;
-    // }) => {
-    //   console.log(
-    //     "handleToggleVideo Event received on client side:",
-    //     remoteProducerId,
-    //     isPlaying
-    //   );
-    //   setVideoStreams((prev) => {
-    //     console.log("prev", prev);
-    //     const updated = new Map(prev);
-    //     const existing = updated.get(remoteProducerId);
-    //     console.log("existing", existing);
-    //     if (existing) {
-    //       updated.set(remoteProducerId, {
-    //         ...existing,
-    //         userData: {
-    //           ...existing.userData,
-    //           isPlaying,
-    //         },
-    //       });
-    //     }
-    //     console.log("updated", updated);
-    //     return updated;
-    //   });
-    // };
     const handleProducerPauseResume = ({
       producerId,
       socketId,
@@ -1106,134 +1041,6 @@ const Space = () => {
     };
   }, [socket, session]);
 
-  // Org method to add stream to VideoStreams
-  // creating new promise to add stream to videoStreams
-  // const addMyStreamToVideoStreams = async () => {
-  //   if (!stream) {
-  //     return;
-  //   }
-  //   return new Promise<void>((resolve) => {
-  //     setVideoStreams((prev) => {
-  //       const updated = new Map(prev);
-  //       updated.set(userData.email, {
-  //         userData: userData,
-  //         stream: stream,
-  //       });
-  //       console.log("Updated video streams:", updated.size); // Debug log
-  //       return updated;
-  //     });
-  //     resolve();
-  //   });
-  // };
-
-  // For Producer
-  // useEffect(() => {
-  //   if (!stream || !socket || !deviceCreated) {
-  //     console.log("Waiting for dependencies:");
-  //     return;
-  //   }
-
-  //   addGivenStream(userData, stream);
-
-  //   // ORG : Just for video
-  //   // const connectSendTransport = async () => {
-  //   //   try {
-  //   //     // For Video Track
-  //   //     const track = stream?.getVideoTracks()[0];
-  //   //     console.log("Got video track:", !!track);
-
-  //   //     producer = await producerTransport.produce({
-  //   //       ...params,
-  //   //       track,
-  //   //       appData: { mediaTag: "cam-video" },
-  //   //     });
-
-  //   //     console.log("Producer created successfully");
-
-  //   //     // Now, on creating producer server notified existing peers about this producer
-  //   //     // setIsProducerCreated(true);
-
-  //   //     producer.on("trackended", () => {
-  //   //       console.log("Track ended");
-  //   //     });
-
-  //   //     producer.on("transportclose", () => {
-  //   //       console.log("Producer transport closed");
-  //   //     });
-  //   //   } catch (error) {
-  //   //     console.error("Error in connectSendTransport:", error);
-  //   //   }
-  //   // };
-
-  //   // Modified : For video and audio
-
-  //   const createSendTransport = async () => {
-  //     await socket.emit(
-  //       "createWebRtcTransport",
-  //       { consumer: false },
-  //       ({ params }: { params: TransportCallbackParams }) => {
-  //         if (params.error) {
-  //           console.log(`Error while creating send transport: ${params.error}`);
-  //           return;
-  //         }
-  //         console.log("Transport received from server:", params);
-
-  //         // Making Client ProducerTransport from transport received from server
-  //         producerTransport = device.createSendTransport(params);
-
-  //         producerTransport.on(
-  //           "connect",
-  //           async ({ dtlsParameters }, callback, errback) => {
-  //             try {
-  //               // sending dtls parameters to server
-  //               await socket.emit("transport-connect", {
-  //                 // transportId: producerTransport.id,
-  //                 dtlsParameters: dtlsParameters,
-  //               });
-  //               console.log("transport-connect event received on server");
-  //               // telling transport that parameters were transmitted to server
-  //               callback();
-  //             } catch (error) {
-  //               errback(error as Error);
-  //             }
-  //           }
-  //         );
-
-  //         producerTransport.on(
-  //           "produce",
-  //           async (parameters, callback, errback) => {
-  //             console.log("producerTransport.on produce", parameters);
-
-  //             try {
-  //               await socket.emit(
-  //                 "transport-produce",
-  //                 {
-  //                   // transportId: producerTransport.id,
-  //                   kind: parameters.kind,
-  //                   rtpParameters: parameters.rtpParameters,
-  //                   appData: parameters.appData,
-  //                 },
-  //                 ({ id }: { id: string }) => {
-  //                   // Telling the transport that parameters were sent
-  //                   // and this is our server side producer's id
-  //                   callback({ id });
-  //                 }
-  //               );
-  //             } catch (error) {
-  //               errback(error as Error);
-  //             }
-  //           }
-  //         );
-  //         console.log("producerTransport created successfully");
-  //         console.log("connecting producer");
-  //         connectSendTransport();
-  //       }
-  //     );
-  //   };
-  //   console.log("All dependencies ready, creating producer transport");
-  //   createSendTransport();
-  // }, [stream, socket, deviceCreated]);
-
   useEffect(() => {
     if (!stream || !socket || !deviceCreated) {
       // console.log("Waiting for dependencies:");
@@ -1244,58 +1051,6 @@ const Space = () => {
       // console.log("Socket exists but not connected, waiting for connection...");
       return;
     }
-
-    // const connectSendTransport = async () => {
-    //   try {
-    //     // Produce video track
-    //     const videoTrack = stream?.getVideoTracks()[0];
-    //     // console.log("Got video track:", !!videoTrack);
-
-    //     // if (isVideoOn && videoTrack) {
-    //     const videoProducer = await producerTransport.produce({
-    //       ...params,
-    //       track: videoTrack,
-    //       appData: { mediaTag: "cam-video" },
-    //     });
-    //     addTrack(userData, "video", stream?.getVideoTracks()[0]);
-    //     setVideoProducer(videoProducer);
-    //     setHasVideoProducerCreated(true);
-    //     console.log("Video Produced to server successfully");
-
-    //     videoProducer.on("trackended", () => {
-    //       console.log("Video track ended");
-    //     });
-
-    //     videoProducer.on("transportclose", () => {
-    //       console.log("Video producer transport closed");
-    //     });
-    //     // }
-
-    //     // Produce audio track
-    //     const audioTrack = stream?.getAudioTracks()[0];
-    //     console.log("Got audio track:", !!audioTrack);
-
-    //     // if (isAudioOn && audioTrack) {
-    //     const audioProducer = await producerTransport.produce({
-    //       ...params,
-    //       track: audioTrack,
-    //       appData: { mediaTag: "cam-audio" },
-    //     });
-    //     setAudioProducer(audioProducer);
-    //     setHasAudioProducerCreated(true);
-
-    //     audioProducer.on("trackended", () => {
-    //       console.log("Audio track ended");
-    //     });
-
-    //     audioProducer.on("transportclose", () => {
-    //       console.log("Audio producer transport closed");
-    //     });
-    //     // }
-    //   } catch (error) {
-    //     console.error("Error in connectSendTransport:", error);
-    //   }
-    // };
 
     const createSendTransport = async () => {
       await socket.emit(
@@ -1433,217 +1188,6 @@ const Space = () => {
       createAudioProducer();
     }
   }, [isAudioOn, producerTransportCreated]);
-
-  // useEffect(() => {
-  //   if (!stream || !socket || !deviceCreated) {
-  //     return;
-  //   }
-
-  //   if (!socket.connected) {
-  //     return;
-  //   }
-  // },[stream, socket, deviceCreated]);
-
-  // // First useEffect - handles audio producer creation
-  // useEffect(() => {
-  //   if (!stream || !socket || !deviceCreated) {
-  //     return;
-  //   }
-
-  //   if (!socket.connected) {
-  //     return;
-  //   }
-
-  //   const createAudioProducer = async (transport: Transport) => {
-  //     const audioTrack = stream?.getAudioTracks()[0];
-
-  //     if (audioTrack) {
-  //       const audioProducer = await transport.produce({
-  //         ...params,
-  //         track: audioTrack,
-  //         appData: { mediaTag: "cam-audio" },
-  //       });
-
-  //       setIsAudioProducerCreated(true);
-
-  //       audioProducer.on("trackended", () => {
-  //         console.log("Audio track ended");
-  //       });
-
-  //       audioProducer.on("transportclose", () => {
-  //         console.log("Audio producer transport closed");
-  //       });
-  //     }
-  //   };
-
-  //   const createSendTransport = async () => {
-  //     await socket.emit(
-  //       "createWebRtcTransport",
-  //       { consumer: false },
-  //       ({ params }: { params: TransportCallbackParams }) => {
-  //         if (params.error) {
-  //           console.log(`Error while creating send transport: ${params.error}`);
-  //           return;
-  //         }
-
-  //         producerTransport = device.createSendTransport(params);
-
-  //         producerTransport.on(
-  //           "connect",
-  //           async ({ dtlsParameters }, callback, errback) => {
-  //             try {
-  //               await socket.emit("transport-connect", {
-  //                 dtlsParameters: dtlsParameters,
-  //               });
-  //               callback();
-  //             } catch (error) {
-  //               errback(error as Error);
-  //             }
-  //           }
-  //         );
-
-  //         producerTransport.on(
-  //           "produce",
-  //           async (parameters, callback, errback) => {
-  //             try {
-  //               await socket.emit(
-  //                 "transport-produce",
-  //                 {
-  //                   kind: parameters.kind,
-  //                   rtpParameters: parameters.rtpParameters,
-  //                   appData: parameters.appData,
-  //                 },
-  //                 ({ id }: { id: string }) => {
-  //                   callback({ id });
-  //                 }
-  //               );
-  //             } catch (error) {
-  //               errback(error as Error);
-  //             }
-  //           }
-  //         );
-
-  //         // Only create audio producer initially
-  //         createAudioProducer(producerTransport);
-  //       }
-  //     );
-  //   };
-
-  //   console.log("Creating initial producer transport for audio");
-  //   createSendTransport();
-  // }, [stream, socket, deviceCreated]);
-
-  // // Second useEffect - handles video producer creation and cleanup
-  // // useEffect(() => {
-  // //   if (!stream || !socket || !deviceCreated || !producerTransport) {
-  // //     return;
-  // //   }
-  // //   console.log("VIDEO USEEFFECT TRIGGERED");
-
-  // //   let videoProducer: Producer | null = null;
-
-  // //   const handleVideoProducer = async () => {
-  // //     const videoTrack = stream?.getVideoTracks()[0];
-
-  // //     if (isVideoOn && videoTrack) {
-  // //       console.log("Creating video producer");
-  // //       addTrack(userData, "video", videoTrack);
-
-  // //       try {
-  // //         videoProducer = await producerTransport.produce({
-  // //           ...params,
-  // //           track: videoTrack,
-  // //           appData: { mediaTag: "cam-video" },
-  // //         });
-
-  // //         setIsVideoProducerCreated(true);
-
-  // //         videoProducer.on("trackended", () => {
-  // //           console.log("Video track ended");
-  // //         });
-
-  // //         videoProducer.on("transportclose", () => {
-  // //           console.log("Video producer transport closed");
-  // //         });
-  // //       } catch (error) {
-  // //         console.error("Error creating video producer:", error);
-  // //       }
-  // //     } else if (!isVideoOn && videoProducer) {
-  // //       console.log("Closing video producer");
-  // //       await videoProducer.close();
-  // //       videoProducer = null;
-  // //       setIsVideoProducerCreated(false);
-  // //     }
-  // //   };
-
-  // //   handleVideoProducer();
-
-  // //   // Cleanup function
-  // //   // return () => {
-  // //   //   if (videoProducer) {
-  // //   //     console.log("Cleaning up video producer");
-  // //   //     videoProducer.close();
-  // //   //   }
-  // //   // };
-  // // }, [stream, socket, deviceCreated, isVideoOn, producerTransport]);
-  // useEffect(() => {
-  //   if (!stream || !socket || !deviceCreated || !producerTransport) {
-  //     return;
-  //   }
-  //   console.log("VIDEO USEEFFECT TRIGGERED");
-
-  //   const handleVideoProducer = async () => {
-  //     const videoTrack = stream?.getVideoTracks()[0];
-
-  //     // Case 1: Video should be ON
-  //     if (isVideoOn && videoTrack) {
-  //       // Only create new producer if we don't have one
-  //       if (!videoProducerRef.current) {
-  //         console.log("Creating video producer");
-  //         addTrack(userData, "video", videoTrack);
-
-  //         try {
-  //           videoProducerRef.current = await producerTransport.produce({
-  //             ...params,
-  //             track: videoTrack,
-  //             appData: { mediaTag: "cam-video" },
-  //           });
-
-  //           setIsVideoProducerCreated(true);
-
-  //           videoProducerRef.current.on("trackended", () => {
-  //             console.log("Video track ended");
-  //           });
-
-  //           videoProducerRef.current.on("transportclose", () => {
-  //             console.log("Video producer transport closed");
-  //           });
-  //         } catch (error) {
-  //           console.error("Error creating video producer:", error);
-  //         }
-  //       }
-  //     }
-  //     // Case 2: Video should be OFF
-  //     else if (!isVideoOn && videoProducerRef.current) {
-  //       console.log("Closing video producer");
-  //       videoProducerRef.current.close();
-  //       videoProducerRef.current = null;
-  //       setIsVideoProducerCreated(false);
-  //     }
-  //   };
-
-  //   handleVideoProducer();
-
-  //   // Cleanup function is important for component unmount
-  //   // return () => {
-  //   //   if (videoProducerRef.current) {
-  //   //     console.log("Cleaning up video producer on unmount");
-  //   //     videoProducerRef.current.close();
-  //   //     videoProducerRef.current = null;
-  //   //     setIsVideoProducerCreated(false);
-  //   //   }
-  //   // };
-  // }, [stream, socket, deviceCreated, isVideoOn, producerTransport]);
 
   if (isConnecting) {
     return (
