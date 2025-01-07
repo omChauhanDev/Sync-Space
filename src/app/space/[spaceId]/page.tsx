@@ -1248,19 +1248,6 @@ const Space = () => {
       createAudioProducer();
     }
   }, [isAudioOn, producerTransportCreated]);
-
-  if (isConnecting) {
-    return (
-      <div className='min-h-screen h-full flex items-center justify-center p-4'>
-        {!stream && (
-          <div className='text-foreground text-4xl mb-4 animate-pulse'>
-            Connecting to space...
-          </div>
-        )}
-      </div>
-    );
-  }
-
   // For debugging at prod
   useEffect(() => {
     console.log("### Auth Status Debug ###");
@@ -1279,6 +1266,18 @@ const Space = () => {
     deviceCreated,
     producerTransportCreated,
   ]);
+
+  if (isConnecting) {
+    return (
+      <div className='min-h-screen h-full flex items-center justify-center p-4'>
+        {!stream && (
+          <div className='text-foreground text-4xl mb-4 animate-pulse'>
+            Connecting to space...
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <>
