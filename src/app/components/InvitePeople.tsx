@@ -69,7 +69,7 @@ const InvitePeople = ({
           <FontAwesomeIcon icon={faCopy} className='mr-2' />
           Copy Invite Link
         </button>
-        <SendInvite />
+        <SendInvite setIsInviteOpen={setIsOpen} />
       </div>
     </div>
   );

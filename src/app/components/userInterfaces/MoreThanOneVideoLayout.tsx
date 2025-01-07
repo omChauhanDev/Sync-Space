@@ -17,7 +17,7 @@ type UserMedia = {
 };
 
 interface MoreThanOneVideoLayoutProps {
-  userMedia: Map<string, UserMedia>;
+  userMediaMapRef: React.MutableRefObject<Map<string, UserMedia>>;
   userData: UserData;
   isAudioOn: boolean;
   isVideoOn: boolean;
@@ -25,7 +25,7 @@ interface MoreThanOneVideoLayoutProps {
 }
 
 const MoreThanOneVideoLayout: React.FC<MoreThanOneVideoLayoutProps> = ({
-  userMedia,
+  userMediaMapRef,
   userData,
   isAudioOn,
   isVideoOn,
@@ -50,10 +50,38 @@ const MoreThanOneVideoLayout: React.FC<MoreThanOneVideoLayoutProps> = ({
     return "h-[calc(25vh-2rem)]";
   };
 
-  const participants = Array.from(userMedia.values());
+  const participants = Array.from(userMediaMapRef.current.values());
+
+  console.log(
+    "NOTE : Final participants changed while rendering: ",
+    participants
+  );
 
   return noOfLiveVideoTracks === 0 ? (
-    <div className='w-[90%] md:w-[82%] lg:w-[88%] h-screen max-h-[calc(100vh-2rem)] mt-4 rounded-3xl overflow-hidden'>
+    <div className='relative w-[90%] md:w-[82%] lg:w-[88%] h-screen max-h-[calc(100vh-2rem)] mt-4 rounded-3xl overflow-hidden'>
+      {participants.map(
+        ({
+          userData: peerData,
+          audioTrack: peerAudioTrack,
+          videoTrack: peerVideoTrack,
+        }) => (
+          <Player
+            key={peerData.email}
+            playerId={peerData.email}
+            audioTrack={peerAudioTrack}
+            videoTrack={peerVideoTrack}
+            name={peerData.name}
+            image={peerData.image}
+            isAudioOn={
+              peerData.email === userData.email ? false : peerData.isAudioOn
+            }
+            isVideoOn={
+              peerData.email === userData.email ? isVideoOn : peerData.isVideoOn
+            }
+            isCurrentUser={peerData.email === userData.email}
+          />
+        )
+      )}
       <NoVideoLayout noOneExists={false} />
     </div>
   ) : noOfLiveVideoTracks === 1 ? (

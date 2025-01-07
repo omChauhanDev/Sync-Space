@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import InvitePeople from "./InvitePeople";
 import UpperSectionForInvitation from "./userInterfaces/UpperSectionForInvitation";
 import Modal from "@/components/ui/Modal";
@@ -19,6 +19,11 @@ const RightControlPanel = ({
       <InvitePeople setIsOpen={setIsInviteOpen} />
     </div>
   );
+  // for debug
+  useEffect(() => {
+    console.log("Value of isInviteOpen changed to", isInviteOpen);
+  }, [isInviteOpen]);
+
   return (
     <div className='flex items-center justify-center'>
       {noOfLiveVideoTracks > 0 && (

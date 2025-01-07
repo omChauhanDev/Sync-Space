@@ -1220,7 +1220,7 @@ const Space = () => {
 
         {allMembersInSpace.size > 1 && (
           <MoreThanOneVideoLayout
-            userMedia={userMedia}
+            userMediaMapRef={userMediaRef}
             userData={userData}
             isAudioOn={isAudioOn}
             isVideoOn={isVideoOn}

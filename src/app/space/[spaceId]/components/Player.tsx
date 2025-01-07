@@ -81,19 +81,19 @@ const Player: React.FC<PlayerProps> = ({
   const shouldShowAudioOnly = !isVideoOn && isAudioOn && audioTrack;
 
   return (
-    <div className='rounded-3xl w-full h-full overflow-hidden relative bg-gray-900'>
-      <div className='w-full h-full'>
-        <video
-          ref={videoRef}
-          id={playerId}
-          autoPlay
-          playsInline
-          muted={!isAudioOn}
-          className={`w-full h-full object-cover ${
-            shouldShowVideo ? "" : "hidden"
-          }`}
-        />
-      </div>
+    <div className='rounded-3xl w-full h-full overflow-hidden relative bg-transparent'>
+      {/* <div className='max-h-full max-w-full min-h-0 min-w-0'> */}
+      <video
+        ref={videoRef}
+        id={playerId}
+        autoPlay
+        playsInline
+        muted={!isAudioOn}
+        className={`w-full h-full object-cover ${
+          shouldShowVideo ? "" : "hidden"
+        }`}
+      />
+      {/* </div> */}
       {shouldShowVideo && (
         <>
           <div className='absolute top-3 right-3 md:top-5 md:right-5 xl:top-8 xl:right-8 2xl:top-20 2xl:right-8 3xl:top-20 3xl:right-20'>

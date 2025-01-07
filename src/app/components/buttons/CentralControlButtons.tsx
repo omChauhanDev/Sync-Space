@@ -33,7 +33,7 @@ const CentralControlButtons = ({
     setIsVideoOn(!isVideoOn);
   };
   return (
-    <div className='flex items-center justify-center gap-6'>
+    <div className='flex items-center justify-center gap-6 z-50'>
       <Button
         className={`rounded-3xl px-3 py-6 ${videoButtonBgColor}`}
         onClick={handlePlayClick}

@@ -12,11 +12,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 
-export function SendInvite() {
+export function SendInvite({
+  setIsInviteOpen = undefined,
+}: {
+  setIsInviteOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +65,7 @@ export function SendInvite() {
       setEmail("");
       toast.success(
         <div className='flex items-center gap-2 text-md font-bold'>
-          <span>Space Id Copied</span>
+          <span>Invite Sent</span>
         </div>
       );
     } catch (err) {
@@ -74,7 +78,15 @@ export function SendInvite() {
   };
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+    <Dialog
+      open={isDialogOpen}
+      onOpenChange={(value) => {
+        setIsDialogOpen(value);
+        if (setIsInviteOpen) {
+          setIsInviteOpen(false);
+        }
+      }}
+    >
       <DialogTrigger asChild>
         <button className='btn btn-outline btn-secondary'>
           <FontAwesomeIcon icon={faEnvelope} className='mr-2' />
@@ -96,7 +108,7 @@ export function SendInvite() {
                 type='email'
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder='user@example.com'
+                placeholder='user@gmail.com'
                 className='col-span-7'
                 required
                 disabled={isLoading}
