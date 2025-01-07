@@ -106,6 +106,13 @@ const Space = () => {
   // Current User
   const { stream } = useMediaStream();
   const { data: session, status } = useSession();
+
+  useEffect(() => {
+    console.log("status", status);
+    if (status === "authenticated") {
+      console.log("Authenticated with session:", session);
+    }
+  }, [status]);
   // Get URL parameters for initial preferences
   const searchParams =
     typeof window !== "undefined"
