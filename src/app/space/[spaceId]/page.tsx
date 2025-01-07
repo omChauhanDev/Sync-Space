@@ -106,13 +106,6 @@ const Space = () => {
   // Current User
   const { stream } = useMediaStream();
   const { data: session, status } = useSession();
-
-  useEffect(() => {
-    console.log("status", status);
-    if (status === "authenticated") {
-      console.log("Authenticated with session:", session);
-    }
-  }, [status]);
   // Get URL parameters for initial preferences
   const searchParams =
     typeof window !== "undefined"
@@ -712,50 +705,108 @@ const Space = () => {
     // Get routerRtpCapabilities from server
     // Get info that any producerAlreadyExist? in this space-router
     // Create device with routerRtpCapabilities
+    // const syncSpace = () => {
+    //   console.log("syncSpace function called");
+    //   updateUserData();
+    //   if (!userData) {
+    //     console.error("No user data available");
+    //     setIsConnecting(true);
+    //     return;
+    //   }
+    //   socket.emit(
+    //     "sync-space",
+    //     { spaceId, userData },
+    //     async (data: SyncSpaceResponse) => {
+    //       routerRtpCapabilities = data.rtpCapabilities;
+    //       createDevice();
+
+    //       if (data.allMembersData?.length > 0) {
+    //         try {
+    //           console.log(
+    //             `Adding ${data.allMembersData.length} existing members...`
+    //           );
+
+    //           await Promise.all(
+    //             data.allMembersData.map(async ({ socketId, userData }) => {
+    //               await addUser(socketId, userData);
+    //               console.log(`Added member with socketId: ${socketId}`);
+    //             })
+    //           );
+
+    //           console.log("All existing members added successfully");
+    //           setIsConnecting(false);
+    //         } catch (error) {
+    //           console.error("Failed to add existing members:", error);
+    //           // You might want to handle this error appropriately
+    //         }
+    //       } else {
+    //         console.log("No existing members to add");
+    //       }
+
+    //       if (data.isProducerExist) {
+    //         consumeExistingProducers();
+    //       }
+    //       setDeviceCreated(true);
+    //     }
+    //   );
+    // };
+
     const syncSpace = () => {
-      console.log("syncSpace function called");
-      updateUserData();
+      console.log("### Sync Space Debug ###");
+      console.log("Starting sync space with userData:", userData);
+
       if (!userData) {
-        console.error("No user data available");
+        console.error("Sync space failed: No user data available");
         setIsConnecting(true);
         return;
       }
-      socket.emit(
-        "sync-space",
-        { spaceId, userData },
-        async (data: SyncSpaceResponse) => {
-          routerRtpCapabilities = data.rtpCapabilities;
-          createDevice();
 
-          if (data.allMembersData?.length > 0) {
+      try {
+        socket.emit(
+          "sync-space",
+          { spaceId, userData },
+          async (data: SyncSpaceResponse) => {
+            console.log("### Sync Space Response ###");
+            console.log("Received data:", data);
+
             try {
-              console.log(
-                `Adding ${data.allMembersData.length} existing members...`
-              );
+              routerRtpCapabilities = data.rtpCapabilities;
+              await createDevice();
+              console.log("Device created successfully");
 
-              await Promise.all(
-                data.allMembersData.map(async ({ socketId, userData }) => {
-                  await addUser(socketId, userData);
-                  console.log(`Added member with socketId: ${socketId}`);
-                })
-              );
+              if (data.allMembersData?.length > 0) {
+                console.log(
+                  `Processing ${data.allMembersData.length} existing members`
+                );
 
-              console.log("All existing members added successfully");
+                try {
+                  await Promise.all(
+                    data.allMembersData.map(async ({ socketId, userData }) => {
+                      await addUser(socketId, userData);
+                      console.log(`Added member: ${socketId}`);
+                    })
+                  );
+                } catch (memberError) {
+                  console.error("Failed to process members:", memberError);
+                }
+              }
+
+              if (data.isProducerExist) {
+                await consumeExistingProducers();
+              }
+
+              setDeviceCreated(true);
               setIsConnecting(false);
             } catch (error) {
-              console.error("Failed to add existing members:", error);
-              // You might want to handle this error appropriately
+              console.error("Error in sync space callback:", error);
+              setIsConnecting(false);
             }
-          } else {
-            console.log("No existing members to add");
           }
-
-          if (data.isProducerExist) {
-            consumeExistingProducers();
-          }
-          setDeviceCreated(true);
-        }
-      );
+        );
+      } catch (error) {
+        console.error("Error emitting sync-space:", error);
+        setIsConnecting(false);
+      }
     };
 
     // Signal received from server that new producer joined
@@ -1035,6 +1086,8 @@ const Space = () => {
     // socket.on("createWbeRtcTransport", {sender: true}, );
 
     return () => {
+      console.log("### Cleanup Debug ###");
+      console.log("Cleaning up socket connections");
       // socket.off("connect");
       socket.off("client-connected", handleSocketConnection);
       socket.off("new-member-joined", handleNewMemberJoined);
@@ -1046,7 +1099,7 @@ const Space = () => {
 
       // socket.off("router-rtp-capabilities", receiveRouterRtpCapabilities);
     };
-  }, [socket, status]);
+  }, [socket, status, session]);
 
   useEffect(() => {
     if (!stream || !socket || !deviceCreated) {
@@ -1207,6 +1260,25 @@ const Space = () => {
       </div>
     );
   }
+
+  // For debugging at prod
+  useEffect(() => {
+    console.log("### Auth Status Debug ###");
+    console.log("Current status:", status);
+    console.log("Session exists:", !!session);
+    console.log("Session user:", session?.user);
+    console.log("Socket exists:", !!socket);
+    console.log("Stream exists:", !!stream);
+    console.log("Device created:", deviceCreated);
+    console.log("Producer transport created:", producerTransportCreated);
+  }, [
+    status,
+    session,
+    socket,
+    stream,
+    deviceCreated,
+    producerTransportCreated,
+  ]);
 
   return (
     <>
