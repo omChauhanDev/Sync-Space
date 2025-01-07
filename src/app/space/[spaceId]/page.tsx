@@ -687,7 +687,7 @@ const Space = () => {
 
   // Main Logic for socket connection
   useEffect(() => {
-    if (!socket) return;
+    if (!socket || !session?.user || status !== "authenticated") return;
 
     // Step 1:
     // Client establish socket connection with server
@@ -1039,7 +1039,7 @@ const Space = () => {
 
       // socket.off("router-rtp-capabilities", receiveRouterRtpCapabilities);
     };
-  }, [socket, session]);
+  }, [socket, status]);
 
   useEffect(() => {
     if (!stream || !socket || !deviceCreated) {
