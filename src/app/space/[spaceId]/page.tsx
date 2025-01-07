@@ -144,6 +144,25 @@ const Space = () => {
     []
   );
   const [userData, setUserData] = useState<UserData>(initialUserData);
+  const [isAuthReady, setIsAuthReady] = useState(false);
+  const initializationRef = useRef(false);
+
+  useEffect(() => {
+    if (status === "authenticated" && session?.user) {
+      setIsAuthReady(true);
+      setUserData({
+        name: session.user.name || "Anonymous",
+        email: session.user.email || "dummy@email.com",
+        image: session.user.image || "No Image Provided by google",
+        isAudioOn: isAudioOn,
+        isVideoOn: isVideoOn,
+      });
+    } else if (status === "unauthenticated") {
+      // Handle unauthenticated state
+      console.error("User is not authenticated");
+      setIsConnecting(false);
+    }
+  }, [status, session]);
 
   const params = useParams<{ spaceId: string }>();
   const spaceId = params.spaceId;
@@ -687,7 +706,10 @@ const Space = () => {
 
   // Main Logic for socket connection
   useEffect(() => {
-    if (!socket || !session?.user || status !== "authenticated") return;
+    // if (!socket || !session?.user || status !== "authenticated") return;
+    if (!socket || !isAuthReady || initializationRef.current) return;
+
+    initializationRef.current = true;
 
     // Step 1:
     // Client establish socket connection with server
@@ -697,7 +719,9 @@ const Space = () => {
         socketId
       );
       mySocketId = socketId;
-      syncSpace();
+      if (session?.user) {
+        syncSpace();
+      }
     };
 
     // Step 2:
@@ -755,8 +779,8 @@ const Space = () => {
       console.log("### Sync Space Debug ###");
       console.log("Starting sync space with userData:", userData);
 
-      if (!userData) {
-        console.error("Sync space failed: No user data available");
+      if (!userData || !socket) {
+        console.error("Sync space failed: Missing required data");
         setIsConnecting(true);
         return;
       }
@@ -764,10 +788,21 @@ const Space = () => {
       try {
         socket.emit(
           "sync-space",
-          { spaceId, userData },
+          {
+            spaceId,
+            userData: {
+              ...userData,
+              name: session?.user?.name || "Anonymous",
+              email: session?.user?.email || "dummy@email.com",
+              image: session?.user?.image || "No Image Provided by google",
+            },
+          },
           async (data: SyncSpaceResponse) => {
-            console.log("### Sync Space Response ###");
-            console.log("Received data:", data);
+            if (!data) {
+              console.error("No response from sync-space");
+              setIsConnecting(false);
+              return;
+            }
 
             try {
               routerRtpCapabilities = data.rtpCapabilities;
@@ -775,20 +810,11 @@ const Space = () => {
               console.log("Device created successfully");
 
               if (data.allMembersData?.length > 0) {
-                console.log(
-                  `Processing ${data.allMembersData.length} existing members`
+                await Promise.all(
+                  data.allMembersData.map(async ({ socketId, userData }) => {
+                    await addUser(socketId, userData);
+                  })
                 );
-
-                try {
-                  await Promise.all(
-                    data.allMembersData.map(async ({ socketId, userData }) => {
-                      await addUser(socketId, userData);
-                      console.log(`Added member: ${socketId}`);
-                    })
-                  );
-                } catch (memberError) {
-                  console.error("Failed to process members:", memberError);
-                }
               }
 
               if (data.isProducerExist) {
@@ -1082,24 +1108,27 @@ const Space = () => {
     socket.on("producer-closed-connection", handleProducerClosedConnection);
     socket.on("producer-pause", handleProducerPauseResume);
     socket.on("producer-resume", handleProducerPauseResume);
-    // socket.on("router-rtp-capabilities", receiveRouterRtpCapabilities);
-    // socket.on("createWbeRtcTransport", {sender: true}, );
 
     return () => {
       console.log("### Cleanup Debug ###");
       console.log("Cleaning up socket connections");
-      // socket.off("connect");
-      socket.off("client-connected", handleSocketConnection);
-      socket.off("new-member-joined", handleNewMemberJoined);
-      socket.off("member-left", handleMemberLeft);
-      socket.off("new-producer-joined", handleNewProducerJoined);
-      socket.off("producer-closed-connection", handleProducerClosedConnection);
-      socket.off("producer-pause", handleProducerPauseResume);
-      socket.off("producer-resume", handleProducerPauseResume);
 
-      // socket.off("router-rtp-capabilities", receiveRouterRtpCapabilities);
+      if (socket) {
+        socket.off("client-connected", handleSocketConnection);
+        socket.off("new-member-joined", handleNewMemberJoined);
+        socket.off("member-left", handleMemberLeft);
+        socket.off("new-producer-joined", handleNewProducerJoined);
+        socket.off(
+          "producer-closed-connection",
+          handleProducerClosedConnection
+        );
+        socket.off("producer-pause", handleProducerPauseResume);
+        socket.off("producer-resume", handleProducerPauseResume);
+      }
+
+      initializationRef.current = false;
     };
-  }, [socket, status, session]);
+  }, [socket, isAuthReady]);
 
   useEffect(() => {
     if (!stream || !socket || !deviceCreated) {
@@ -1267,14 +1296,23 @@ const Space = () => {
     producerTransportCreated,
   ]);
 
-  if (isConnecting) {
+  // if (isConnecting) {
+  //   return (
+  //     <div className='min-h-screen h-full flex items-center justify-center p-4'>
+  //       {!stream && (
+  //         <div className='text-foreground text-4xl mb-4 animate-pulse'>
+  //           Connecting to space...
+  //         </div>
+  //       )}
+  //     </div>
+  //   );
+  // }
+  if (!isAuthReady || isConnecting) {
     return (
       <div className='min-h-screen h-full flex items-center justify-center p-4'>
-        {!stream && (
-          <div className='text-foreground text-4xl mb-4 animate-pulse'>
-            Connecting to space...
-          </div>
-        )}
+        <div className='text-foreground text-4xl mb-4 animate-pulse'>
+          {!isAuthReady ? "Authenticating..." : "Connecting to space..."}
+        </div>
       </div>
     );
   }
