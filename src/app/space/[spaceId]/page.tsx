@@ -687,7 +687,7 @@ const Space = () => {
 
   // Main Logic for socket connection
   useEffect(() => {
-    if (!socket || !session?.user || status !== "authenticated") return;
+    if (!socket) return;
 
     // Step 1:
     // Client establish socket connection with server
