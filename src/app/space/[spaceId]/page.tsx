@@ -144,25 +144,25 @@ const Space = () => {
     []
   );
   const [userData, setUserData] = useState<UserData>(initialUserData);
-  const [isAuthReady, setIsAuthReady] = useState(false);
-  const initializationRef = useRef(false);
+  // const [isAuthReady, setIsAuthReady] = useState(false);
+  // const initializationRef = useRef(false);
 
-  useEffect(() => {
-    if (status === "authenticated" && session?.user) {
-      setIsAuthReady(true);
-      setUserData({
-        name: session.user.name || "Anonymous",
-        email: session.user.email || "dummy@email.com",
-        image: session.user.image || "No Image Provided by google",
-        isAudioOn: isAudioOn,
-        isVideoOn: isVideoOn,
-      });
-    } else if (status === "unauthenticated") {
-      // Handle unauthenticated state
-      console.error("User is not authenticated");
-      setIsConnecting(false);
-    }
-  }, [status, session]);
+  // useEffect(() => {
+  //   if (status === "authenticated" && session?.user) {
+  //     setIsAuthReady(true);
+  //     setUserData({
+  //       name: session.user.name || "Anonymous",
+  //       email: session.user.email || "dummy@email.com",
+  //       image: session.user.image || "No Image Provided by google",
+  //       isAudioOn: isAudioOn,
+  //       isVideoOn: isVideoOn,
+  //     });
+  //   } else if (status === "unauthenticated") {
+  //     // Handle unauthenticated state
+  //     console.error("User is not authenticated");
+  //     // setIsConnecting(false);
+  //   }
+  // }, [status, session]);
 
   const params = useParams<{ spaceId: string }>();
   const spaceId = params.spaceId;
@@ -172,7 +172,9 @@ const Space = () => {
         <h1 className='text-7xl'>Please provide a spaceId</h1>
       </div>
     );
-  const socket = useSocket();
+  // const socket = useSocket();
+  const { socket, isAuthenticated } = useSocket();
+
   const userMediaRef = useRef<Map<string, UserMedia>>(new Map());
   const [userMedia, setUserMedia] = useState<Map<string, UserMedia>>(new Map());
 
@@ -706,10 +708,15 @@ const Space = () => {
 
   // Main Logic for socket connection
   useEffect(() => {
-    // if (!socket || !session?.user || status !== "authenticated") return;
-    if (!socket || !isAuthReady || initializationRef.current) return;
+    console.log("### Main logicn called with params", {
+      socket,
+      isAuthenticated,
+      // initializationRef,
+    });
 
-    initializationRef.current = true;
+    // if (!socket || !session?.user || status !== "authenticated") return;
+    // if (!socket || !isAuthReady || initializationRef.current) return;
+    if (!socket) return;
 
     // Step 1:
     // Client establish socket connection with server
@@ -1126,9 +1133,9 @@ const Space = () => {
         socket.off("producer-resume", handleProducerPauseResume);
       }
 
-      initializationRef.current = false;
+      // initializationRef.current = false;
     };
-  }, [socket, isAuthReady]);
+  }, [socket, isAuthenticated]);
 
   useEffect(() => {
     if (!stream || !socket || !deviceCreated) {
@@ -1307,11 +1314,11 @@ const Space = () => {
   //     </div>
   //   );
   // }
-  if (!isAuthReady || isConnecting) {
+  if (!isAuthenticated || isConnecting) {
     return (
       <div className='min-h-screen h-full flex items-center justify-center p-4'>
         <div className='text-foreground text-4xl mb-4 animate-pulse'>
-          {!isAuthReady ? "Authenticating..." : "Connecting to space..."}
+          {!isAuthenticated ? "Authenticating..." : "Connecting to space..."}
         </div>
       </div>
     );
