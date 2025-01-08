@@ -1284,36 +1284,7 @@ const Space = () => {
       createAudioProducer();
     }
   }, [isAudioOn, producerTransportCreated]);
-  // For debugging at prod
-  useEffect(() => {
-    console.log("### Auth Status Debug ###");
-    console.log("Current status:", status);
-    console.log("Session exists:", !!session);
-    console.log("Session user:", session?.user);
-    console.log("Socket exists:", !!socket);
-    console.log("Stream exists:", !!stream);
-    console.log("Device created:", deviceCreated);
-    console.log("Producer transport created:", producerTransportCreated);
-  }, [
-    status,
-    session,
-    socket,
-    stream,
-    deviceCreated,
-    producerTransportCreated,
-  ]);
 
-  // if (isConnecting) {
-  //   return (
-  //     <div className='min-h-screen h-full flex items-center justify-center p-4'>
-  //       {!stream && (
-  //         <div className='text-foreground text-4xl mb-4 animate-pulse'>
-  //           Connecting to space...
-  //         </div>
-  //       )}
-  //     </div>
-  //   );
-  // }
   if (!isAuthenticated || isConnecting) {
     return (
       <div className='min-h-screen h-full flex items-center justify-center p-4'>

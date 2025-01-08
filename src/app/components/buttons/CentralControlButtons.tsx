@@ -1,8 +1,9 @@
+"use client";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { MdCallEnd } from "react-icons/md";
-import { IoMdMic } from "react-icons/io";
-import { FaVideo } from "react-icons/fa";
+import { IoMdMic, IoMdMicOff } from "react-icons/io";
+import { FaVideo, FaVideoSlash } from "react-icons/fa";
 
 interface CentralControlButtonsProps {
   isAudioOn: boolean;
@@ -18,12 +19,12 @@ const CentralControlButtons = ({
   setIsVideoOn,
 }: CentralControlButtonsProps) => {
   const micButtonBgColor = isAudioOn
-    ? "bg-white hover:bg-gray-200"
-    : "bg-gray-500 hover:bg-gray-600";
+    ? "bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-300"
+    : "bg-gray-500 hover:bg-gray-600 dark:bg-gray-500 dark:hover:bg-gray-400";
 
   const videoButtonBgColor = isVideoOn
-    ? "bg-white hover:bg-gray-200"
-    : "bg-gray-500 hover:bg-gray-600";
+    ? "bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-300"
+    : "bg-gray-500 hover:bg-gray-600 dark:bg-gray-500 dark:hover:bg-gray-400";
 
   const handleMuteClick = () => {
     setIsAudioOn(!isAudioOn);
@@ -32,22 +33,40 @@ const CentralControlButtons = ({
   const handlePlayClick = () => {
     setIsVideoOn(!isVideoOn);
   };
+
+  const handleRedirect = () => {
+    const currentUrl = window.location.href;
+    const baseUrl = currentUrl.split("/space")[0];
+    window.location.href = baseUrl;
+  };
   return (
-    <div className='flex items-center justify-center gap-6 z-50'>
+    <div className='flex items-center justify-center gap-6'>
       <Button
         className={`rounded-3xl px-3 py-6 ${videoButtonBgColor}`}
         onClick={handlePlayClick}
       >
-        <FaVideo style={{ width: "23px", height: "23px" }} />
+        {isVideoOn ? (
+          <FaVideo style={{ width: "23px", height: "23px" }} />
+        ) : (
+          <FaVideoSlash style={{ width: "23px", height: "23px" }} />
+        )}
       </Button>
-      <Button variant='destructive' className='rounded-xl px-6 py-6'>
+      <Button
+        variant='destructive'
+        className='rounded-xl px-6 py-6'
+        onClick={handleRedirect}
+      >
         <MdCallEnd style={{ width: "28px", height: "28px" }} />
       </Button>
       <Button
         className={`rounded-3xl px-3 py-6 ${micButtonBgColor}`}
         onClick={handleMuteClick}
       >
-        <IoMdMic style={{ width: "24px", height: "24px" }} />
+        {isAudioOn ? (
+          <IoMdMic style={{ width: "24px", height: "24px" }} />
+        ) : (
+          <IoMdMicOff style={{ width: "24px", height: "24px" }} />
+        )}
       </Button>
     </div>
   );

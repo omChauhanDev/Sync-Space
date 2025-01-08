@@ -10,7 +10,7 @@ const NoVideoLayout = ({ noOneExists }: { noOneExists: boolean }) => {
     <UpperSectionWithMembers />
   );
   return (
-    <div className='absolute top-0 right-0 hero h-full w-full min-h-screen flex justify-center items-center pb-24'>
+    <div className='absolute top-0 right-0 hero h-full w-full min-h-screen flex justify-center items-center pb-24 z-0'>
       <div className='hero-content text-center'>
         <div className='max-w-2xl'>
           <div className='flex flex-col items-center gap-8'>

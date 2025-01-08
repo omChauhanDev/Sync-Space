@@ -18,11 +18,11 @@ const UpperSectionWithMembers = () => {
       </div>
 
       <div className='space-y-4'>
-        {/* <h1 className='text-4xl font-bold text-base-content'>
-          It's quiet in here...
-        </h1> */}
-        <p className='text-xl text-base-content/70'>
-          Share this link with others to get connected!
+        <h1 className='text-4xl font-bold dark:text-base-content text-neutral-600'>
+          Connect with Anyone, Anywhere
+        </h1>
+        <p className='text-xl dark:text-base-content/70 text-neutral-600/70'>
+          Share this link to invite more people!
         </p>
       </div>
     </>

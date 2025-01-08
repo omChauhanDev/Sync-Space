@@ -22,11 +22,11 @@ export function ModeToggle() {
       onClick={setThemeHandler}
     >
       <Sun
-        style={{ width: "23px", height: "23px" }}
+        style={{ width: "26px", height: "26px" }}
         className='h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0'
       />
       <Moon
-        style={{ width: "23px", height: "23px" }}
+        style={{ width: "26px", height: "26px" }}
         className='absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100'
       />
       <span className='sr-only selected-none appearance-none border-none'>

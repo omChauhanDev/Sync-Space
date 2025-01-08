@@ -43,12 +43,12 @@ const InvitePeople = ({
     <div className='flex flex-col gap-8 items-center'>
       <div className='space-id-container'>
         <div className='join'>
-          <div className='bg-base-200 join-item px-4 flex items-center font-mono'>
+          <div className='bg-[#dcdfe7] dark:bg-[#191e24] join-item px-4 flex items-center font-mono justify-center'>
             <FontAwesomeIcon icon={faHashtag} className='mr-2' />
           </div>
 
           <input
-            className='input input-bordered join-item font-mono'
+            className='bg-[#dcdfe7] dark:bg-[#1d232a] input input-bordered border-slate-500 join-item font-mono'
             readOnly
             value={spaceId}
           />
@@ -76,64 +76,3 @@ const InvitePeople = ({
 };
 
 export default InvitePeople;
-
-{
-  /* <div className='min-h-screen bg-base-200 flex items-center justify-center p-4'>
-<div className='card w-full max-w-2xl bg-base-100 shadow-xl'>
-  <div className='card-body items-center text-center space-y-6'>
-    <div className='avatar placeholder'>
-      <div className='bg-neutral text-neutral-content rounded-full w-24'>
-        <span className='text-3xl'>
-          <i className='fas fa-video-slash'></i>
-        </span>
-      </div>
-    </div>
-
-    <h2 className='card-title text-3xl font-bold'>
-      Camera is turned off
-    </h2>
-
-    <p className='text-base-content/80 max-w-md'>
-      Your camera is currently disabled. Enable it to join the video
-      meeting or continue with audio only.
-    </p>
-
-    <div className='divider'>Meeting Details</div>
-
-    <div className='join w-full max-w-md'>
-      <input
-        className='join-item input input-bordered flex-1'
-        value='meet.google.com/abc-defg-hij'
-        readOnly
-      />
-      <button
-        className='join-item btn btn-primary'
-        onClick={() => copyToClipboard(spaceLink)}
-      >
-        <i className='fas fa-copy mr-2'></i>
-        Copy Link
-      </button>
-    </div>
-
-    <div className='flex flex-wrap gap-4 justify-center mt-6'>
-      <button className='btn btn-primary'>
-        <i className='fas fa-video mr-2'></i>
-        Enable Camera
-      </button>
-      <button className='btn btn-outline'>
-        <i className='fas fa-phone-alt mr-2'></i>
-        Join with Audio
-      </button>
-    </div>
-
-    <div className='alert alert-info shadow-lg mt-4'>
-      <i className='fas fa-info-circle'></i>
-      <span>
-        Having trouble? Check your camera settings or device
-        permissions.
-      </span>
-    </div>
-  </div>
-</div>
-</div> */
-}

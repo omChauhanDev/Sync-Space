@@ -15,10 +15,10 @@ const UpperSectionOneMember = () => {
       </div>
 
       <div className='space-y-4'>
-        <h1 className='text-4xl font-bold text-base-content'>
+        <h1 className='text-4xl font-bold dark:text-base-content text-neutral-600'>
           It's quiet in here...
         </h1>
-        <p className='text-xl text-base-content/70'>
+        <p className='text-xl dark:text-base-content/70 text-neutral-600/70'>
           Share this link with others to get connected!
         </p>
       </div>

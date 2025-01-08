@@ -26,7 +26,7 @@ const ControlPanel = ({
   noOfLiveVideoTracks,
 }: ControlPanelProps) => {
   return (
-    <div className='sm:grid grid-cols-3 items-center h-24 w-full hidden'>
+    <div className='sm:grid grid-cols-3 items-center h-24 w-full hidden z-50'>
       <DateAndTime />
       <CentralControlButtons
         isAudioOn={isAudioOn}

@@ -81,7 +81,7 @@ const Player: React.FC<PlayerProps> = ({
   const shouldShowAudioOnly = !isVideoOn && isAudioOn && audioTrack;
 
   return (
-    <div className='rounded-3xl w-full h-full overflow-hidden relative bg-transparent'>
+    <div className='rounded-3xl w-full h-full overflow-hidden bg-transparent'>
       {/* <div className='max-h-full max-w-full min-h-0 min-w-0'> */}
       <video
         ref={videoRef}
@@ -94,21 +94,6 @@ const Player: React.FC<PlayerProps> = ({
         }`}
       />
       {/* </div> */}
-      {shouldShowVideo && (
-        <>
-          <div className='absolute top-3 right-3 md:top-5 md:right-5 xl:top-8 xl:right-8 2xl:top-20 2xl:right-8 3xl:top-20 3xl:right-20'>
-            {!isCurrentUser &&
-              (isAudioOn ? (
-                <PiMicrophoneLight className='text-black size-5 md:size-6 lg:size-7 xl:size-8 2xl:size-9' />
-              ) : (
-                <PiMicrophoneSlash className='text-black size-5 md:size-6 lg:size-7 xl:size-8 2xl:size-9' />
-              ))}
-          </div>
-          <div className='text-black text-sm md:text-md lg:text-lg xl:text-xl absolute bottom-3 left-3 md:bottom-5 md:left-5 xl:bottom-8 xl:left-8 2xl:bottom-20 2xl:left-8 3xl:bottom-20 3xl:left-20'>
-            {name}
-          </div>
-        </>
-      )}
     </div>
   );
 };
