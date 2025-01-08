@@ -115,8 +115,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       console.log("Creating new socket connection for authenticated user");
 
       socketRef.current = io(
-        // "https://18.61.3.171:8000/mediasoup"
-        "https://localhost:8000/mediasoup"
+        "https://18.61.3.171:8000/mediasoup"
+        // "https://localhost:8000/mediasoup"
         // , {
         //   reconnection: true,
         //   reconnectionAttempts: 5,
