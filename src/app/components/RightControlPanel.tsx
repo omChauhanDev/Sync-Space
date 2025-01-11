@@ -7,32 +7,19 @@ import { useTheme } from "next-themes";
 
 const RightControlPanel = ({
   noOfLiveVideoTracks,
+  isInviteOpen,
+  setIsInviteOpen,
+  trigger,
+  content,
 }: {
   noOfLiveVideoTracks: number;
+  isInviteOpen: boolean;
+  setIsInviteOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  trigger: JSX.Element;
+  content: JSX.Element;
 }) => {
-  const [isInviteOpen, setIsInviteOpen] = useState(false);
-  const { theme } = useTheme();
-
-  const trigger = (
-    <img
-      src={theme === "dark" ? "/invitationWhite.png" : "/invitationBlack.png"}
-      alt='Invitation Icon'
-      className='w-7 h-7'
-    />
-  );
-  const content = (
-    <div className='flex flex-col items-center gap-8 m-6'>
-      <UpperSectionForInvitation />
-      <InvitePeople setIsOpen={setIsInviteOpen} />
-    </div>
-  );
-  // for debug
-  useEffect(() => {
-    console.log("Value of isInviteOpen changed to", isInviteOpen);
-  }, [isInviteOpen]);
-
   return (
-    <div className='flex items-center justify-center gap-6'>
+    <div className='col-span-2 sm:col-span-1 flex items-center justify-center gap-6'>
       {noOfLiveVideoTracks > 0 && (
         <Modal
           isOpen={isInviteOpen}
@@ -42,7 +29,7 @@ const RightControlPanel = ({
           contentClassName='appearance-none select-none bg-background'
         />
       )}
-      <div className='flex items-center justify-center'>
+      <div className='sm:flex items-center justify-center hidden'>
         <ModeToggle />
       </div>
     </div>

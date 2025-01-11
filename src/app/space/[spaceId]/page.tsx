@@ -1297,7 +1297,7 @@ const Space = () => {
 
   return (
     <>
-      <div className='relative flex flex-col max-h-screen min-h-screen w-full h-full justify-center items-center'>
+      <div className='relative flex flex-col max-h-screen min-h-screen w-full h-full justify-center items-center z-10'>
         <LeftBar
           noOfMembers={allMembersInSpace.size}
           allMembersRef={allMembersRef}

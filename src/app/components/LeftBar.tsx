@@ -80,10 +80,10 @@ const LeftBar = ({
   );
 
   return (
-    <div className='absolute top-6 left-4 md:top-8 md:left-6 lg:left-8 z-10'>
-      <div className='relative w-12 h-12 bg-background rounded-full flex items-center justify-center'>
-        <FontAwesomeIcon icon={faUsers} className='text-3xl dark:text-white' />
-        <div className='absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-3 -end-3 dark:border-gray-900'>
+    <div className='absolute top-2 left-2 sm:top-6 sm:left-4 md:top-8 md:left-6 lg:left-8 z-10'>
+      <div className='relative w-12 h-12 bg-transparent rounded-full flex items-center justify-center'>
+        <FontAwesomeIcon icon={faUsers} className='text-2xl sm:text-3xl dark:text-white' />
+        <div className='absolute inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-1 -end-1 sm:-top-3 sm:-end-3 dark:border-gray-900'>
           {noOfMembers}
         </div>
       </div>

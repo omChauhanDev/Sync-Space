@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { MdCallEnd } from "react-icons/md";
 import { IoMdMic, IoMdMicOff } from "react-icons/io";
 import { FaVideo, FaVideoSlash } from "react-icons/fa";
+import { ModeToggle } from "../ModeToggle";
+import Modal from "@/components/ui/Modal";
 
 interface CentralControlButtonsProps {
   isAudioOn: boolean;
@@ -40,7 +42,7 @@ const CentralControlButtons = ({
     window.location.href = baseUrl;
   };
   return (
-    <div className='flex items-center justify-center gap-6'>
+    <div className='col-span-8 sm:col-span-1 flex items-center justify-center gap-6'>
       <Button
         className={`rounded-3xl px-3 py-6 ${videoButtonBgColor}`}
         onClick={handlePlayClick}

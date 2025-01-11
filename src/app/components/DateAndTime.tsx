@@ -70,7 +70,7 @@ const DateAndTime = () => {
     return `${formattedHours}:${formattedMinutes} ${ampm}`;
   };
   return (
-    <div className='flex ml-10 text-lg font-medium'>
+    <div className='sm:flex ml-10 lg:font-medium lg:text-md hidden'>
       <h3 className=''>{getFormattedDate()}</h3>
       <p className='px-2'>|</p>
       <h3 className=''>{getFormattedTime()}</h3>

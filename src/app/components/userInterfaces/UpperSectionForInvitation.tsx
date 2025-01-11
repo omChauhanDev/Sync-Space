@@ -15,11 +15,8 @@ const UpperSectionForInvitation = () => {
       </div>
 
       <div className='space-y-4'>
-        {/* <h1 className='text-4xl font-bold text-base-content'>
-          It's quiet in here...
-        </h1> */}
-        <p className='text-xl text-base-content/70'>
-          Share this link with others to get connected!
+        <p className='text-lg sm:text-xl text-base-content/70'>
+          Share this link to get connected!
         </p>
       </div>
     </>

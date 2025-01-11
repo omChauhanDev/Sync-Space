@@ -63,7 +63,7 @@ const InvitePeople = ({
 
       <div className='flex flex-wrap justify-center gap-4'>
         <button
-          className='btn btn-outline btn-info'
+          className='btn btn-outline btn-info btn-block sm:w-auto'
           onClick={() => copyToClipboard("spaceLink")}
         >
           <FontAwesomeIcon icon={faCopy} className='mr-2' />

@@ -89,7 +89,7 @@ export function SendInvite({
       }}
     >
       <DialogTrigger asChild>
-        <button className='btn btn-outline btn-secondary'>
+        <button className='btn btn-outline btn-secondary btn-block sm:w-auto'>
           <FontAwesomeIcon icon={faEnvelope} className='mr-2' />
           Share via Email
         </button>
