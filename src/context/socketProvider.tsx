@@ -108,39 +108,41 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const { data: session, status } = useSession();
   const socketRef = useRef<Socket | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const url = "https://18.61.28.39:8000/mediasoup";
+  // const url = "https://localhost:8000/mediasoup";
 
   // Create socket instance only
   const createSocket = () => {
     if (status === "authenticated" && session?.user && !socketRef.current) {
-      console.log("Creating new socket connection for authenticated user");
+      console.log("Hello : Creating new socket connection for authenticated use on url ", url);
 
-      // socketRef.current = io(
-      //   "https://18.61.28.39:8000/mediasoup"
-      //   // "https://localhost:8000/mediasoup"
-      //   // , {
-      //   //   reconnection: true,
-      //   //   reconnectionAttempts: 5,
-      //   //   reconnectionDelay: 1000,
-      //   //   auth: {
-      //   //     token: session.user.email,
-      //   //   },
-      //   // }
+      socketRef.current = io(
+        // "https://18.61.28.39:8000/mediasoup"
+        url
+        , {
+          reconnection: true,
+          reconnectionAttempts: 5,
+          reconnectionDelay: 1000,
+          // auth: {
+          //   token: session.user.email,
+          // },
+        // }
         
       // );
-      socketRef.current = io("https://18.61.28.39:8000/mediasoup", {
-        transports: ['websocket', 'polling'],
-        secure: true,
-        rejectUnauthorized: false,
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-        withCredentials: true,
-        auth: {
-          token: session.user.email,
-        },
-        // Add error handling
-        autoConnect: true,
-        timeout: 20000,
+      // socketRef.current = io("https://18.61.28.39:8000/mediasoup", {
+      //   transports: ['websocket', 'polling'],
+      //   secure: true,
+      //   rejectUnauthorized: false,
+      //   reconnection: true,
+      //   reconnectionAttempts: 5,
+      //   reconnectionDelay: 1000,
+      //   withCredentials: true,
+      //   auth: {
+      //     token: session.user.email,
+      //   },
+      //   // Add error handling
+      //   autoConnect: true,
+      //   timeout: 20000,
       });
 
       return socketRef.current;
