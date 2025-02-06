@@ -43,8 +43,8 @@ export function SendInvite({
 
     try {
       const response = await fetch(
-        "https://localhost:8000/api/mail/send-invite",
-        // "https://18.61.28.39:8000/api/mail/send-invite",
+        // "https://localhost:8000/api/mail/send-invite",
+        "https://18.61.28.39:8000/api/mail/send-invite",
         {
           method: "POST",
           headers: {
