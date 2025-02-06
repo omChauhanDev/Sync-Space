@@ -12,7 +12,7 @@ const CreateSpace = () => {
     const spaceId = uuidv4();
     const spaceLink = `https://sync-space-web.vercel.app/space/${spaceId}`;
     const encodedSpaceLink = encodeURIComponent(spaceLink);
-    router.push(`https://18.61.3.171:8000/api/mail/join-space?invite=${encodedSpaceLink}`);
+    router.push(`https://18.61.28.39:8000/api/mail/join-space?invite=${encodedSpaceLink}`);
   };
   return (
     <div className='bg-background w-full'>
