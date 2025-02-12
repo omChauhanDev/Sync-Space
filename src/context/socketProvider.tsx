@@ -108,8 +108,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const { data: session, status } = useSession();
   const socketRef = useRef<Socket | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const url = "https://18.61.28.39:8000/mediasoup";
-  // const url = "https://localhost:8000/mediasoup";
+  // const url = "https://18.61.28.39:8000/mediasoup";
+  const url = "https://localhost:8000/mediasoup";
 
   // Create socket instance only
   const createSocket = () => {

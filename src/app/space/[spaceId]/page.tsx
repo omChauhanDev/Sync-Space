@@ -144,6 +144,7 @@ const Space = () => {
     []
   );
   const [userData, setUserData] = useState<UserData>(initialUserData);
+  const [isRecording, setIsRecording] = useState<boolean>(false);
   // const [isAuthReady, setIsAuthReady] = useState(false);
   // const initializationRef = useRef(false);
 
@@ -1327,6 +1328,8 @@ const Space = () => {
           setIsAudioOn={setIsAudioOn}
           setIsVideoOn={setIsVideoOn}
           noOfLiveVideoTracks={noOfLiveVideoTracks}
+          isRecording={isRecording}
+          setIsRecording={setIsRecording}
         />
       </div>
     </>

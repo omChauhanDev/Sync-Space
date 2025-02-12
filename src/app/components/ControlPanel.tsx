@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import UpperSectionForInvitation from "./userInterfaces/UpperSectionForInvitation";
 import InvitePeople from "./InvitePeople";
 import { ModeToggle } from "./ModeToggle";
+import { Socket } from "socket.io-client";
 
 interface ControlPanelProps {
   isAudioOn: boolean;
@@ -13,6 +14,8 @@ interface ControlPanelProps {
   setIsAudioOn: React.Dispatch<React.SetStateAction<boolean>>;
   setIsVideoOn: React.Dispatch<React.SetStateAction<boolean>>;
   noOfLiveVideoTracks: number;
+  isRecording: boolean;
+  setIsRecording: React.Dispatch<React.SetStateAction<boolean>>;
 }
 type UserData = {
   name: string;
@@ -28,6 +31,8 @@ const ControlPanel = ({
   setIsAudioOn,
   setIsVideoOn,
   noOfLiveVideoTracks,
+  isRecording,
+  setIsRecording,
 }: ControlPanelProps) => {
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const { theme } = useTheme();
@@ -65,6 +70,8 @@ const ControlPanel = ({
         setIsInviteOpen={setIsInviteOpen}
         trigger={trigger}
         content={content}
+        isRecording={isRecording}
+        setIsRecording={setIsRecording}
       />
     </div>
   );
